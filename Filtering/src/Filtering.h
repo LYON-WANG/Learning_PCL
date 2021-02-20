@@ -31,6 +31,7 @@
 #include <pcl/filters/statistical_outlier_removal.h> // Statistical Outlier Removal
 #include <pcl/filters/radius_outlier_removal.h>      // Radius Outlier Removal
 #include <pcl/filters/uniform_sampling.h>            // Uniform Sampling
+#include <pcl/filters/extract_indices.h>             // Extract pointCloud according to indices
 
 #include <pcl/visualization/cloud_viewer.h> // Visualization
 
@@ -47,6 +48,7 @@ public:
     typename pcl::PointCloud<PointT>::Ptr StatisticalOutlierRemoval( const typename pcl::PointCloud<PointT>::Ptr &cloud,  const int &meanK, const double &StddevMulThresh );
     typename pcl::PointCloud<PointT>::Ptr RadiusOutlierRemoval( const typename pcl::PointCloud<PointT>::Ptr &cloud,  const double &Radius, const int &MinNeighborsInRadius );
     typename pcl::PointCloud<PointT>::Ptr UniformSampling( const typename pcl::PointCloud<PointT>::Ptr &cloud, const float &SearchRadius);
+    typename pcl::PointCloud<PointT>::Ptr IndicesExtract( const typename pcl::PointCloud<PointT>::Ptr &cloud, boost::shared_ptr<const PointT> &indices);
 };
 
 #endif /* FILTERING_H_ */
