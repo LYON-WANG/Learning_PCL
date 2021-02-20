@@ -2,43 +2,26 @@
 #include "Function_Filtering.cpp"
 #include "supportFunction.cpp"
 
-typedef pcl::PointCloud<pcl::PointXYZ>  Cloud;
-
 int main (int argc, char** argv)
 {
-  // Create Pointcloud object
-  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_ptr(new pcl::PointCloud<pcl::PointXYZ>());
-  //pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered_ptr(new pcl::PointCloud<pcl::PointXYZ>());
+  Filters<pcl::PointXYZ> filters;
+  // Read test dataset and create Pointcloud object
+  pcl::PCLPointCloud2::Ptr cloud2_ptr(new pcl::PCLPointCloud2());
+  pcl::PCDReader fileReader;
+  fileReader.read("../../Test_data/data_1/0000000000.pcd", *cloud2_ptr);
+  if(cloud2_ptr==NULL) { std::cout << "pcd file read err" << std::endl; return -1;}
+  std::cout << "PointCLoud before filtering: " << cloud2_ptr->width * cloud2_ptr->height
+       << ", data format: ( " << pcl::getFieldsList (*cloud2_ptr) << " )." << std::endl;
 
-  // Create point cloud　
-  cloud_ptr -> width  = 5;
-  cloud_ptr -> height = 1;
-  cloud_ptr -> points.resize (cloud_ptr->width * cloud_ptr->height);
-  for (size_t i = 0; i < cloud_ptr->points.size (); ++i)
-  {
-    cloud_ptr->points[i].x = 1024 * rand () / (RAND_MAX + 1.0f);
-    cloud_ptr->points[i].y = 1024 * rand () / (RAND_MAX + 1.0f);
-    cloud_ptr->points[i].z = 1024 * rand () / (RAND_MAX + 1.0f);
-  }
-  std::cerr << "Cloud before filtering:" << std::endl;
-  for (size_t i = 0; i < cloud_ptr->points.size (); ++i)
-    std::cerr << "    " << cloud_ptr->points[i].x << " " 
-                        << cloud_ptr->points[i].y << " " 
-                        << cloud_ptr->points[i].z << std::endl;
+  // VoxelGrid DownSampling
+  auto cloud_down_ptr = filters.VoxelGridDownSampling(cloud2_ptr, 0.1f);
 
   // Pass Filter
-  Filters<pcl::PointXYZ> filters;
-  std::array<float,2> range = {0.0, 1.0};
-  auto cloud_filtered_ptr = filters.PassFilter(cloud_ptr, "z", range);
+  auto cloud_pass_ptr = filters.PassThroughFilter(cloud_down_ptr, "z", std::array<float, 2> {0.0f, 1.0f});
 
-  std::cerr << "Cloud after filtering:" << std::endl;
-  for (size_t i = 0; i < cloud_filtered_ptr->points.size (); ++i)
-    std::cerr << "    " << cloud_filtered_ptr->points[i].x << " " 
-                        << cloud_filtered_ptr->points[i].y << " " 
-                        << cloud_filtered_ptr->points[i].z << std::endl;
   // Visualization
   pcl::visualization::CloudViewer viewer("PCD Viewer");
-  viewer.showCloud(cloud_filtered_ptr);
-  while (!viewer.wasStopped()){}
+  viewer.showCloud(cloud_down_ptr);
+  while (!viewer.wasStopped()){} // Do nothing but wait
   return 0;
 }
