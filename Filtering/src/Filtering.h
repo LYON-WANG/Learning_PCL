@@ -27,7 +27,10 @@
 #include <pcl/io/pcd_io.h>
 
 #include <pcl/filters/passthrough.h>        // PassThrough Filter
-#include <pcl/filters/voxel_grid.h>         // VoxelGrid DownSampling
+#include <pcl/filters/voxel_grid.h>         // VoxelGrid Down Sampling
+#include <pcl/filters/statistical_outlier_removal.h> // Statistical Outlier Removal
+#include <pcl/filters/radius_outlier_removal.h>      // Radius Outlier Removal
+#include <pcl/filters/uniform_sampling.h>            // Uniform Sampling
 
 #include <pcl/visualization/cloud_viewer.h> // Visualization
 
@@ -39,10 +42,11 @@ public:
 
     // Destructor
     ~Filters() = default;
-    typename pcl::PointCloud<PointT>::Ptr PassThroughFilter(const typename pcl::PointCloud<PointT>::Ptr &cloud, const std::__cxx11::string &axis, const std::array<float, 2> &limits);
-    typename pcl::PointCloud<PointT>::Ptr VoxelGridDownSampling( const typename pcl::PCLPointCloud2::Ptr &cloud, const float &filterRes);
-    typename pcl::PointCloud<PointT>::Ptr StatisticalOutlierRemoval();
-    
+    typename pcl::PointCloud<PointT>::Ptr PassThroughFilter( const typename pcl::PointCloud<PointT>::Ptr &cloud, const std::__cxx11::string &axis, const std::array<float, 2> &limits);
+    typename pcl::PointCloud<PointT>::Ptr VoxelGridDownSampling( const typename pcl::PCLPointCloud2::Ptr &cloud2, const float &filterRes);
+    typename pcl::PointCloud<PointT>::Ptr StatisticalOutlierRemoval( const typename pcl::PointCloud<PointT>::Ptr &cloud,  const int &meanK, const double &StddevMulThresh );
+    typename pcl::PointCloud<PointT>::Ptr RadiusOutlierRemoval( const typename pcl::PointCloud<PointT>::Ptr &cloud,  const double &Radius, const int &MinNeighborsInRadius );
+    typename pcl::PointCloud<PointT>::Ptr UniformSampling( const typename pcl::PointCloud<PointT>::Ptr &cloud, const float &SearchRadius);
 };
 
 #endif /* FILTERING_H_ */

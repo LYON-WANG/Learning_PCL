@@ -31,7 +31,7 @@ typename pcl::PointCloud<PointT>::Ptr
  Filters<PointT>::VoxelGridDownSampling( const typename pcl::PCLPointCloud2::Ptr &cloud2, const float &filterRes){
     // DownSample the dataset using a given leaf size
     pcl::PCLPointCloud2::Ptr cloud2_filtered(new pcl::PCLPointCloud2()); // Create filtered object
-    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered(new pcl::PointCloud<pcl::PointXYZ>());
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered(new pcl::PointCloud<PointT>());
     pcl::VoxelGrid<pcl::PCLPointCloud2> voxelFilter;
     voxelFilter.setInputCloud(cloud2); // Set input point cloud
     voxelFilter.setLeafSize(filterRes, filterRes, filterRes); // Set voxel size
@@ -39,5 +39,48 @@ typename pcl::PointCloud<PointT>::Ptr
     pcl::fromPCLPointCloud2(*cloud2_filtered, *cloud_filtered);
     std::cout << "[VoxelGridDownSampling]  Original points: " << cloud2->width * cloud2->height <<  ", Filtered points: " << cloud_filtered->points.size() << std::endl;
     return cloud_filtered;
-} // Need to improve code structue......
+} // this function structure looks like a shit.... ,(O∆O),
 
+template<typename PointT>
+typename pcl::PointCloud<PointT>::Ptr 
+ Filters<PointT>::StatisticalOutlierRemoval(const typename pcl::PointCloud<PointT>::Ptr &cloud, 
+                                            const int &meanK, const double &StddevMulThresh){
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered(new pcl::PointCloud<pcl::PointXYZ>());
+    pcl::StatisticalOutlierRemoval<PointT> sor;
+    sor.setInputCloud(cloud);
+    sor.setMeanK(meanK); // Set the number of nearest neighbors to use for mean distance estimation.
+    sor.setStddevMulThresh(StddevMulThresh); // Set threshold for determining outliers
+    sor.filter(*cloud_filtered);
+    std::cout << "[StatisticalOutlierRemoval] " << " Original points: " 
+              << cloud->points.size() <<  ", Filtered points: " << cloud_filtered->points.size() << std::endl;
+    return cloud_filtered;
+}  // Can be used for reducing noise
+
+template<typename PointT>
+typename pcl::PointCloud<PointT>::Ptr 
+ Filters<PointT>::RadiusOutlierRemoval( const typename pcl::PointCloud<PointT>::Ptr &cloud, 
+                                        const double &Radius, const int &MinNeighborsInRadius){
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered(new pcl::PointCloud<pcl::PointXYZ>());
+    pcl::RadiusOutlierRemoval<PointT> ror;
+    ror.setInputCloud(cloud);
+    ror.setRadiusSearch(Radius);
+    ror.setMinNeighborsInRadius(MinNeighborsInRadius);
+    ror.filter(*cloud_filtered);
+    std::cout << "[RadiusOutlierRemoval] " << " Original points: " 
+              << cloud->points.size() <<  ", Filtered points: " << cloud_filtered->points.size() << std::endl;
+    return cloud_filtered;
+}
+
+template<typename PointT>
+typename pcl::PointCloud<PointT>::Ptr 
+ Filters<PointT>::UniformSampling(  const typename pcl::PointCloud<PointT>::Ptr &cloud, 
+                                    const float &SearchRadius){
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered(new pcl::PointCloud<pcl::PointXYZ>());
+    pcl::UniformSampling<PointT> us;
+    us.setInputCloud(cloud);
+    us.setRadiusSearch(SearchRadius);
+    us.filter(*cloud_filtered);
+    std::cout << "[UniformSampling] " << " Original points: " 
+              << cloud->points.size() <<  ", Filtered points: " << cloud_filtered->points.size() << std::endl;
+    return cloud_filtered;
+ } // Uniform sampling: Keep one point in the radius sphere (center of gravity point)
