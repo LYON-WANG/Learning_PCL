@@ -1,5 +1,6 @@
-#include "Filtering.hpp"
+#include "Filtering.h"
 #include "Function_Filtering.cpp"
+#include "supportFunction.cpp"
 
 typedef pcl::PointCloud<pcl::PointXYZ>  Cloud;
 
@@ -7,7 +8,7 @@ int main (int argc, char** argv)
 {
   // Create Pointcloud object
   pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_ptr(new pcl::PointCloud<pcl::PointXYZ>());
-  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered_ptr(new pcl::PointCloud<pcl::PointXYZ>());
+  //pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered_ptr(new pcl::PointCloud<pcl::PointXYZ>());
 
   // Create point cloud　
   cloud_ptr -> width  = 5;
@@ -25,20 +26,16 @@ int main (int argc, char** argv)
                         << cloud_ptr->points[i].y << " " 
                         << cloud_ptr->points[i].z << std::endl;
 
-  // Create filter object
-  pcl::PassThrough<pcl::PointXYZ> pass;
-  pass.setInputCloud(cloud_ptr);
-  pass.setFilterFieldName("z");     // Set filter axis
-  pass.setFilterLimits(0.0f, 1.0f); // Set the filter range
-  pass.filter(*cloud_filtered_ptr);
+  // Pass Filter
+  Filters<pcl::PointXYZ> filters;
+  std::array<float,2> range = {0.0, 1.0};
+  auto cloud_filtered_ptr = filters.PassFilter(cloud_ptr, "z", range);
 
-  // 
   std::cerr << "Cloud after filtering:" << std::endl;
   for (size_t i = 0; i < cloud_filtered_ptr->points.size (); ++i)
     std::cerr << "    " << cloud_filtered_ptr->points[i].x << " " 
                         << cloud_filtered_ptr->points[i].y << " " 
                         << cloud_filtered_ptr->points[i].z << std::endl;
-
   // Visualization
   pcl::visualization::CloudViewer viewer("PCD Viewer");
   viewer.showCloud(cloud_filtered_ptr);
