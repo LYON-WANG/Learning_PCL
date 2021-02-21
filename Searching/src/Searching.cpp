@@ -15,11 +15,11 @@ int main (int argc, char** argv)
     std::cout << "PointCLoud before filtering: " << cloud_ptr->size()
         << ", data format: ( " << pcl::getFieldsList (*cloud_ptr) << " )." << std::endl;
 
-    // Octree:
+    // 1. Neighbors within voxel search:
     float resolution = 128.0f;
     pcl::octree::OctreePointCloudSearch<pcl::PointXYZ> octree (resolution);
     octree.setInputCloud (cloud_ptr);
-    octree.addPointsFromInputCloud ();
+    octree.addPointsFromInputCloud (); // PointCloud -> Octree
 
     pcl::PointXYZ searchPoint; // Define Searching point
     searchPoint.x = 10.0f * rand () / (RAND_MAX + 1.0f);
@@ -42,11 +42,50 @@ int main (int argc, char** argv)
 	       	     << " " << cloud.points[pointIdxVec[i]].z << std::endl;
 	}
 
-    // K nearest neighbor search 
+    // 2. K nearest neighbor search 
     int K = 10;
+    std::vector<int> pointIdxNKNSearch;
+    std::vector<float> pointNKNSquaredDistance;
+
+    std::cout << "K nearest neighbor search at ( "
+            << searchPoint.x << " "
+            << searchPoint.y << " " 
+	        << searchPoint.z << ")" 
+	        << std::endl;
+    if(octree.nearestKSearch(searchPoint, K, pointIdxNKNSearch, pointNKNSquaredDistance) >0){
+        for(size_t i=0; i < pointIdxNKNSearch.size(); ++i)
+            std::cout << " " << cloud.points[ pointIdxNKNSearch[i] ].x 
+		        << " " << cloud.points[ pointIdxNKNSearch[i] ].y 
+		        << " " << cloud.points[ pointIdxNKNSearch[i] ].z 
+		        << " (squared distance: "
+		        << pointNKNSquaredDistance[i] << ")" << std::endl;
+    }
     
+    // 3. Neighbors within radius search
+    std::vector<int> pointIdxRadiusSearch;
+    std::vector<float> pointRadiusSquaredDistance;
+
+    float radius = 25.0f * rand () / (RAND_MAX + 1.0f);
+
+    std::cout << "Neighbors within radius search at (" 
+		    << searchPoint.x << " " 
+		    << searchPoint.y << " " 
+		    << searchPoint.z << ") with radius=" 
+		    << radius << std::endl;
+
+    if (octree.radiusSearch (searchPoint, radius, pointIdxRadiusSearch, pointRadiusSquaredDistance) > 0)
+	  {
+	    for (size_t i = 0; i < pointIdxRadiusSearch.size (); ++i)
+	      std::cout << " " << cloud.points[ pointIdxRadiusSearch[i] ].x 
+		        << " " << cloud.points[ pointIdxRadiusSearch[i] ].y 
+		        << " " << cloud.points[ pointIdxRadiusSearch[i] ].z 
+		        << " (squared distance: " 
+			<< pointRadiusSquaredDistance[i] << ")" << std::endl;
+	  }
+
+
     // Visualization 
-    pcl::visualization::CloudViewer viewer("PCD Viewer");
+    //pcl::visualization::CloudViewer viewer("PCD Viewer");
     //viewer.showCloud(cloud_Uniform_filtered);
     //while (!viewer.wasStopped()){} // Do nothing but wait
     return 0;
