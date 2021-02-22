@@ -26,7 +26,7 @@ std::tuple<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<Point
     EI.setNegative(true);
     EI.filter(*cloud_other);
     return std::make_tuple(cloud_plane, cloud_other);;
-}
+} // Should combine these two functions...
 
 template<typename PointT>
 std::tuple<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT>::Ptr> 
