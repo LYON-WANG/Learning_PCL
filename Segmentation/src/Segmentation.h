@@ -39,6 +39,7 @@ public:
 
     // Destructor
     ~Segmentation() = default;
-    
+    std::tuple<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT>::Ptr> SeparateClouds(const typename pcl::PointCloud<PointT>::Ptr &cloud, const pcl::PointIndices::Ptr &inliers);
+    std::tuple<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT>::Ptr> PlaneSegmentation(const typename pcl::PointCloud<PointT>::Ptr &cloud, const int &maxIterations, const float &distanceThreshold);
 };
 #endif /* SEGMENTATION_H_ */
