@@ -1,5 +1,6 @@
 #include "Segmentation.h"
 #include "Function_Segmentation.cpp"
+#include "supportFunction.cpp"
 
 int main(int argc, char** argv){
     Segmentation<pcl::PointXYZ> segmentation;
@@ -13,8 +14,10 @@ int main(int argc, char** argv){
     // Plane Segmentation
     typename pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_plane(new pcl::PointCloud<pcl::PointXYZ>());
     typename pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_other(new pcl::PointCloud<pcl::PointXYZ>());
-    std::tie(cloud_plane, cloud_other) = segmentation.PlaneSegmentation(cloud, 100, 0.15);
-
+    auto start_timer = std::chrono::system_clock::now();
+    std::tie(cloud_plane, cloud_other) = segmentation.PlaneSegmentation(cloud, 200, 0.2);
+    //std::tie(cloud_plane, cloud_other) = segmentation.ProgressiveMorphologicalSegmentation(cloud, 200, 1.0f, 0.5f, 2.0f);
+    std::cout << "plane segmentation time: " << timer_calculate(start_timer) << "s"<< std::endl;
     
     // Visualization
     pcl::visualization::PCLVisualizer viewer ("3D Viewer");

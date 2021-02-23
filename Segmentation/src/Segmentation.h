@@ -31,6 +31,9 @@
 #include <pcl/segmentation/sac_segmentation.h>
 #include <pcl/visualization/pcl_visualizer.h>
 #include <pcl/filters/extract_indices.h>
+#include <pcl/segmentation/progressive_morphological_filter.h>
+#include <pcl/segmentation/extract_clusters.h>
+
 template<typename PointT>
 class Segmentation{
 public:
@@ -39,7 +42,12 @@ public:
 
     // Destructor
     ~Segmentation() = default;
-    std::tuple<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT>::Ptr> SeparateClouds(const typename pcl::PointCloud<PointT>::Ptr &cloud, const pcl::PointIndices::Ptr &inliers);
-    std::tuple<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT>::Ptr> PlaneSegmentation(const typename pcl::PointCloud<PointT>::Ptr &cloud, const int &maxIterations, const float &distanceThreshold);
+    
+    std::tuple<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT>::Ptr> PlaneSegmentation(const typename pcl::PointCloud<PointT>::Ptr &cloud, 
+                                                                                                               const int &maxIterations, const float &distanceThreshold);
+    std::tuple<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT>::Ptr> ProgressiveMorphologicalSegmentation(const typename pcl::PointCloud<PointT>::Ptr &cloud, const int &MaxWindowSize, 
+                                                                                                                                  const float &Slope, const float &InitialDistance, const float &MaxDistance);
+    std::vector<typename pcl::PointCloud<PointT>::Ptr> EuclideanClustering( const typename pcl::PointCloud<PointT>::Ptr &cloud, 
+                                                                            const float &ClusterTolerance, const int &MinSize, const int &MaxSize);
 };
 #endif /* SEGMENTATION_H_ */

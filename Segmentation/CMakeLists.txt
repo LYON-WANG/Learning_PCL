@@ -28,8 +28,3 @@ add_executable(${PROJECT_NAME}
 target_link_libraries( ${PROJECT_NAME}  ${PCL_LIBRARIES} )
 
 
-# Name of executable file and path of source file
-add_executable(clusters_segmentation
-	${CMAKE_CURRENT_SOURCE_DIR} src/clusters_segmentation.cpp)
-target_link_libraries(clusters_segmentation  ${PCL_LIBRARIES} )
-
