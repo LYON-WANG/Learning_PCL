@@ -25,14 +25,25 @@
 #include <pcl/point_types.h>
 #include <pcl/ModelCoefficients.h>
 #include <pcl/io/pcd_io.h>
+#include <pcl/common/common.h>
 #include <pcl/point_types.h>
 #include <pcl/sample_consensus/method_types.h>
 #include <pcl/sample_consensus/model_types.h>
 #include <pcl/segmentation/sac_segmentation.h>
+#include <pcl/segmentation/extract_clusters.h>
 #include <pcl/visualization/pcl_visualizer.h>
 #include <pcl/filters/extract_indices.h>
 #include <pcl/segmentation/progressive_morphological_filter.h>
 #include <pcl/segmentation/extract_clusters.h>
+
+struct Box{
+	float x_min;
+	float y_min;
+	float z_min;
+	float x_max;
+	float y_max;
+	float z_max;
+};
 
 template<typename PointT>
 class Segmentation{
@@ -49,5 +60,6 @@ public:
                                                                                                                                   const float &Slope, const float &InitialDistance, const float &MaxDistance);
     std::vector<typename pcl::PointCloud<PointT>::Ptr> EuclideanClustering( const typename pcl::PointCloud<PointT>::Ptr &cloud, 
                                                                             const float &ClusterTolerance, const int &MinSize, const int &MaxSize);
+    Box DrawBoundingBox(const typename pcl::PointCloud<PointT>::Ptr& cluster);
 };
 #endif /* SEGMENTATION_H_ */
