@@ -57,7 +57,7 @@ public:
     
     // Destructor
     ~Registration() = default;
-    
+     
     void print4x4Matrix(const Eigen::Matrix4d &matrix); // Print Rotation Matrix & Translation Vector
     typename pcl::PointCloud<pcl::PointNormal>::Ptr Normal_Estimation(const typename pcl::PointCloud<PointT>::Ptr &cloud, const int &KSearch); // Estimate normal of point cloud
     typename pcl::PointCloud<PointT>::Ptr ICP_Point2Point(const typename pcl::PointCloud<PointT>::Ptr &cloud_source, const typename pcl::PointCloud<PointT>::Ptr &cloud_target, const int &MaxIteration); //ICP point-to-point
