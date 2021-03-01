@@ -25,9 +25,8 @@ int main(int argc, char** argv){
     auto cloud_target_normal = registration.Normal_Estimation(cloud_target_down, 30);
 
     // ICP:
-    // pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_ICP(new pcl::PointCloud<pcl::PointXYZ>);
-    auto cloud_ICP = registration.ICP_Point2Plane(cloud_source_normal, cloud_target_normal, 100);
-    
+    //auto cloud_ICP = registration.ICP_Point2Plane(cloud_source_normal, cloud_target_normal, 100);
+    auto cloud_ICP = registration.ICP_Plane2Plane(cloud_source_down, cloud_target_down, 100);
     
     // Visualization 
     // pcl::visualization::PCLVisualizer viewer("ICP TEST");

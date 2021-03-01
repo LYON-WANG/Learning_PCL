@@ -45,6 +45,8 @@
 // Registration
 #include <pcl/registration/icp.h>  // ICP point-to-point
 #include <pcl/registration/icp_nl.h> // ICP Nolinear point-to-plane
+#include <pcl/registration/gicp.h> // ICP plane-to-plane
+#include <pcl/registration/ndt.h> // NDT Registration
 
 // Visualization
 #include <pcl/visualization/pcl_visualizer.h>
@@ -62,6 +64,11 @@ public:
     typename pcl::PointCloud<pcl::PointNormal>::Ptr Normal_Estimation(const typename pcl::PointCloud<PointT>::Ptr &cloud, const int &KSearch); // Estimate normal of point cloud
     typename pcl::PointCloud<PointT>::Ptr ICP_Point2Point(const typename pcl::PointCloud<PointT>::Ptr &cloud_source, const typename pcl::PointCloud<PointT>::Ptr &cloud_target, const int &MaxIteration); //ICP point-to-point
     typename pcl::PointCloud<pcl::PointNormal>::Ptr ICP_Point2Plane(const typename pcl::PointCloud<pcl::PointNormal>::Ptr &cloud_source, const typename pcl::PointCloud<pcl::PointNormal>::Ptr &cloud_target, const int &MaxIteration); //ICP point-to-plane
-    
+    typename pcl::PointCloud<PointT>::Ptr ICP_Plane2Plane(const typename pcl::PointCloud<PointT>::Ptr &cloud_source, const typename pcl::PointCloud<PointT>::Ptr &cloud_target, const int &MaxIteration); //ICP plane-to-plane
+    typename pcl::PointCloud<PointT>::Ptr NDT_Registration( const typename pcl::PointCloud<PointT>::Ptr &cloud_source, const typename pcl::PointCloud<PointT>::Ptr &cloud_target, 
+                                                            const float &tTransformationEpsilon,
+                                                            const float &StepSize,
+                                                            const float &Resolution,
+                                                            const int &MaxIteration);
 };
 #endif /* REGISTRATION_H_ */

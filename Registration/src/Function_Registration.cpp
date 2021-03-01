@@ -64,3 +64,38 @@ template<typename PointT>  //ICP point-to-plane
     std::cout << "\nICP has converged, score is " << icp.getFitnessScore () << std::endl;
     return cloud_source;
 }
+
+template<typename PointT>  //ICP plane-to-plane
+ typename pcl::PointCloud<PointT>::Ptr Registration<PointT>::ICP_Plane2Plane(const typename pcl::PointCloud<PointT>::Ptr &cloud_source,
+                                                                     const typename pcl::PointCloud<PointT>::Ptr &cloud_target, 
+                                                                     const int &MaxIteration){
+    typename pcl::PointCloud<PointT>::Ptr cloud_ICP(new pcl::PointCloud<PointT>);
+    typename pcl::GeneralizedIterativeClosestPoint<PointT, PointT> icp;
+    icp.setMaximumIterations(MaxIteration);
+    icp.setEuclideanFitnessEpsilon(1e-6);  // Convergence condition: The smaller the accuracy, the slower the convergence
+	icp.setMaxCorrespondenceDistance(0.10);
+    icp.setInputSource(cloud_source);      
+    icp.setInputTarget(cloud_target); 
+    icp.align(*cloud_ICP);  
+    std::cout << "\nICP has converged, score is " << icp.getFitnessScore () << std::endl;
+    return cloud_ICP;
+}
+
+template<typename PointT>  //NDT Registration
+ typename pcl::PointCloud<PointT>::Ptr Registration<PointT>::NDT_Registration(const typename pcl::PointCloud<PointT>::Ptr &cloud_source,
+                                                                     const typename pcl::PointCloud<PointT>::Ptr &cloud_target, 
+                                                                     const float &tTransformationEpsilon,
+                                                                     const float &StepSize,
+                                                                     const float &Resolution,
+                                                                     const int &MaxIteration){
+    pcl::NormalDistributionsTransform<PointT, PointT> NDT;
+    NDT.setTransformationEpsilon(tTransformationEpsilon);
+	NDT.setStepSize(StepSize);           
+	NDT.setResolution(Resolution);        
+	NDT.setMaximumIterations(MaxIteration);
+	NDT.setInputSource(cloud_source); 
+	NDT.setInputTarget(cloud_target); 
+	NDT.align(*cloud_source);
+    std::cout << "\nICP has converged, score is " << NDT.getFitnessScore () << std::endl;
+    return cloud_source;
+}
