@@ -43,10 +43,11 @@
 // Segmentation
 
 // Registration
-#include <pcl/registration/icp.h>  // ICP point-to-point
+#include <pcl/registration/icp.h>    // ICP point-to-point
 #include <pcl/registration/icp_nl.h> // ICP Nolinear point-to-plane
-#include <pcl/registration/gicp.h> // ICP plane-to-plane
-#include <pcl/registration/ndt.h> // NDT Registration
+#include <pcl/registration/gicp.h>   // ICP plane-to-plane
+#include <pcl/registration/ndt.h>    // NDT Registration
+#include <pcl/registration/transforms.h> // Transformation matrix 
 
 // Visualization
 #include <pcl/visualization/pcl_visualizer.h>
@@ -60,15 +61,12 @@ public:
     // Destructor
     ~Registration() = default;
      
-    void print4x4Matrix(const Eigen::Matrix4d &matrix); // Print Rotation Matrix & Translation Vector
+    void print4x4Matrix(const Eigen::Matrix4f &matrix); // Print Rotation Matrix & Translation Vector
     typename pcl::PointCloud<pcl::PointNormal>::Ptr Normal_Estimation(const typename pcl::PointCloud<PointT>::Ptr &cloud, const int &KSearch); // Estimate normal of point cloud
-    typename pcl::PointCloud<PointT>::Ptr ICP_Point2Point(const typename pcl::PointCloud<PointT>::Ptr &cloud_source, const typename pcl::PointCloud<PointT>::Ptr &cloud_target, const int &MaxIteration); //ICP point-to-point
-    typename pcl::PointCloud<pcl::PointNormal>::Ptr ICP_Point2Plane(const typename pcl::PointCloud<pcl::PointNormal>::Ptr &cloud_source, const typename pcl::PointCloud<pcl::PointNormal>::Ptr &cloud_target, const int &MaxIteration); //ICP point-to-plane
-    typename pcl::PointCloud<PointT>::Ptr ICP_Plane2Plane(const typename pcl::PointCloud<PointT>::Ptr &cloud_source, const typename pcl::PointCloud<PointT>::Ptr &cloud_target, const int &MaxIteration); //ICP plane-to-plane
-    typename pcl::PointCloud<PointT>::Ptr NDT_Registration( const typename pcl::PointCloud<PointT>::Ptr &cloud_source, const typename pcl::PointCloud<PointT>::Ptr &cloud_target, 
-                                                            const float &tTransformationEpsilon,
-                                                            const float &StepSize,
-                                                            const float &Resolution,
-                                                            const int &MaxIteration);
+    std::tuple<typename pcl::PointCloud<PointT>::Ptr, Eigen::Matrix4f> ICP_Point2Point(const typename pcl::PointCloud<PointT>::Ptr &cloud_source, const typename pcl::PointCloud<PointT>::Ptr &cloud_target, const int &MaxIteration, const float &Epsilon, const float &MaxCorrespondenceDistance); //ICP point-to-point
+    std::tuple<typename pcl::PointCloud<pcl::PointNormal>::Ptr, Eigen::Matrix4f> ICP_Point2Plane(const typename pcl::PointCloud<pcl::PointNormal>::Ptr &cloud_source, const typename pcl::PointCloud<pcl::PointNormal>::Ptr &cloud_target, const int &MaxIteration, const float &Epsilon, const float &MaxCorrespondenceDistance); //ICP point-to-plane
+    std::tuple<typename pcl::PointCloud<PointT>::Ptr, Eigen::Matrix4f> ICP_Plane2Plane(const typename pcl::PointCloud<PointT>::Ptr &cloud_source, const typename pcl::PointCloud<PointT>::Ptr &cloud_target, const int &MaxIteration, const float &Epsilon, const float &MaxCorrespondenceDistance); //ICP plane-to-plane
+    std::tuple<typename pcl::PointCloud<PointT>::Ptr, Eigen::Matrix4f> NDT_Registration( const typename pcl::PointCloud<PointT>::Ptr &cloud_source, const typename pcl::PointCloud<PointT>::Ptr &cloud_target, const float &tTransformationEpsilon, const float &StepSize, const float &Resolution, const int &MaxIteration);
+    std::tuple<typename pcl::PointCloud<PointT>::Ptr, Eigen::Matrix4f> SAC_IA(); // Sample Consensus Initial Aligment
 };
 #endif /* REGISTRATION_H_ */

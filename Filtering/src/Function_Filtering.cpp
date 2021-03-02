@@ -30,7 +30,7 @@ typename pcl::PointCloud<PointT>::Ptr
  Filters<PointT>::VoxelGridDownSampling( const typename pcl::PCLPointCloud2::Ptr &cloud2, const float &filterRes){
     // DownSample the dataset using a given leaf size
     pcl::PCLPointCloud2::Ptr cloud2_filtered(new pcl::PCLPointCloud2()); // Create filtered object
-    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered(new pcl::PointCloud<PointT>());
+    pcl::PointCloud<PointT>::Ptr cloud_filtered(new pcl::PointCloud<PointT>());
     pcl::VoxelGrid<pcl::PCLPointCloud2> voxelFilter;
     voxelFilter.setInputCloud(cloud2); // Set input point cloud
     voxelFilter.setLeafSize(filterRes, filterRes, filterRes); // Set voxel size

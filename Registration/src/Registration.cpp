@@ -20,14 +20,18 @@ int main(int argc, char** argv){
     auto cloud_target_down = filter.VoxelGridDownSampling(cloud_target, 0.1f);
     
     // Estimate normals
-    std::cout << "...Estimate normals..." << std::endl;
+    std::cout << "\n...Estimate normals..." << std::endl;
     auto cloud_source_normal = registration.Normal_Estimation(cloud_source_down, 30);
     auto cloud_target_normal = registration.Normal_Estimation(cloud_target_down, 30);
 
     // ICP:
-    //auto cloud_ICP = registration.ICP_Point2Plane(cloud_source_normal, cloud_target_normal, 100);
-    auto cloud_ICP = registration.ICP_Plane2Plane(cloud_source_down, cloud_target_down, 100);
+    pcl::PointCloud<pcl::PointNormal>::Ptr cloud_ICP(new pcl::PointCloud<pcl::PointNormal>());
+    Eigen::Matrix4f TransMatrix;
+    std::tie(cloud_ICP, TransMatrix) = registration.ICP_Point2Plane(cloud_source_normal, cloud_target_normal, 100, 1e-6, 0.1);
+    // std::tie(cloud_ICP, TransMatrix) = registration.ICP_Plane2Plane(cloud_source_down, cloud_target_down, 100, 1e-6, 0.1);
+    // auto cloud_ICP = registration.NDT_Registration(cloud_source_down, cloud_target_down);
     
+
     // Visualization 
     // pcl::visualization::PCLVisualizer viewer("ICP TEST");
     // viewer.setBackgroundColor(255, 255, 255); // Set black background

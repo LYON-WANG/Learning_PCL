@@ -6,10 +6,10 @@
 /**
  * Developer: Leo Wang
  * E-mail:    liangyu@student.chalmers.se
- * Date:      02/2020
+ * Date:      03/2020
  */
 template<typename PointT> // Print Rotation Matrix & Translation Vector
- void Registration<PointT>::print4x4Matrix(const Eigen::Matrix4d &matrix){
+ void Registration<PointT>::print4x4Matrix(const Eigen::Matrix4f &matrix){
     std::cout << "-----------------" << std::endl;
     std::cout << "Rotation matrix: " << std::endl;
     std::cout << "R = " << matrix (0, 0) << " " << matrix (0, 1) << " " << matrix (0, 2) << std::endl;
@@ -19,9 +19,11 @@ template<typename PointT> // Print Rotation Matrix & Translation Vector
     std::cout << "T = " << matrix (0, 3) << " " << matrix (1, 3) << " " << matrix (2, 3) << std::endl;
     std::cout << "-----------------" << std::endl;
 }
+
 template<typename PointT>  // Estimate normal of point cloud
- typename pcl::PointCloud<pcl::PointNormal>::Ptr Registration<PointT>::Normal_Estimation( const typename pcl::PointCloud<PointT>::Ptr &cloud, 
-                                                                                const int &KSearch){
+ typename pcl::PointCloud<pcl::PointNormal>::Ptr 
+ Registration<PointT>::Normal_Estimation( const typename pcl::PointCloud<PointT>::Ptr &cloud, 
+                                          const int &KSearch){
     pcl::PointCloud<pcl::PointNormal>::Ptr output_with_normals (new pcl::PointCloud<pcl::PointNormal>);
     pcl::NormalEstimationOMP<PointT, pcl::PointNormal> nest;
     pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ> ());
@@ -34,68 +36,99 @@ template<typename PointT>  // Estimate normal of point cloud
 }
 
 template<typename PointT>  //ICP point-to-point
- typename pcl::PointCloud<PointT>::Ptr Registration<PointT>::ICP_Point2Point(const typename pcl::PointCloud<PointT>::Ptr &cloud_source,
-                                                                     const typename pcl::PointCloud<PointT>::Ptr &cloud_target, 
-                                                                     const int &MaxIteration){
-    typename pcl::PointCloud<PointT>::Ptr cloud_ICP(new pcl::PointCloud<PointT>);
+ std::tuple<typename pcl::PointCloud<PointT>::Ptr, Eigen::Matrix4f> 
+ Registration<PointT>::ICP_Point2Point( const typename pcl::PointCloud<PointT>::Ptr &cloud_source,
+                                        const typename pcl::PointCloud<PointT>::Ptr &cloud_target, 
+                                        const int &MaxIteration,
+                                        const float &Epsilon,
+                                        const float &MaxCorrespondenceDistance){
     typename pcl::IterativeClosestPoint<PointT, PointT> icp;
-    //icp.setMaximumIterations(100);
-    //icp.setEuclideanFitnessEpsilon(1e-5);  // Convergence condition: The smaller the accuracy, the slower the convergence
-	//icp.setMaxCorrespondenceDistance(0.10);
-    icp.setInputSource(cloud_source);      
-    icp.setInputTarget(cloud_target); 
-    icp.align(*cloud_ICP);  
-    std::cout << "\nICP has converged, score is " << icp.getFitnessScore () << std::endl;
-    return cloud_ICP;
-}
-
-template<typename PointT>  //ICP point-to-plane
- typename pcl::PointCloud<pcl::PointNormal>::Ptr Registration<PointT>::ICP_Point2Plane(const typename pcl::PointCloud<pcl::PointNormal>::Ptr &cloud_source,
-                                                                     const typename pcl::PointCloud<pcl::PointNormal>::Ptr &cloud_target, 
-                                                                     const int &MaxIteration){
-    typename pcl::PointCloud<PointT>::Ptr cloud_ICP(new pcl::PointCloud<PointT>);
-    typename pcl::IterativeClosestPointNonLinear<pcl::PointNormal, pcl::PointNormal> icp;
     icp.setMaximumIterations(MaxIteration);
-    icp.setEuclideanFitnessEpsilon(1e-6);  // Convergence condition: The smaller the accuracy, the slower the convergence
-	icp.setMaxCorrespondenceDistance(0.10);
+    icp.setEuclideanFitnessEpsilon(Epsilon);  // Convergence condition: The smaller the accuracy, the slower the convergence
+	icp.setMaxCorrespondenceDistance(MaxCorrespondenceDistance);
     icp.setInputSource(cloud_source);      
     icp.setInputTarget(cloud_target); 
     icp.align(*cloud_source);  
-    std::cout << "\nICP has converged, score is " << icp.getFitnessScore () << std::endl;
-    return cloud_source;
+    Eigen::Matrix4f SourceToTarget = Eigen::Matrix4f::Identity();
+    if (icp.hasConverged()){
+        std::cout << "\nICP has converged, score is " << icp.getFitnessScore () << std::endl;
+        std::cout << "Transformation matrix:" << std::endl;
+        SourceToTarget = icp.getFinalTransformation();
+        std::cout << SourceToTarget << std::endl;
+    }
+    return std::make_tuple(cloud_source, SourceToTarget);
+}
+
+template<typename PointT>  //ICP point-to-plane
+ std::tuple<typename pcl::PointCloud<pcl::PointNormal>::Ptr, Eigen::Matrix4f> 
+ Registration<PointT>::ICP_Point2Plane( const typename pcl::PointCloud<pcl::PointNormal>::Ptr &cloud_source,
+                                        const typename pcl::PointCloud<pcl::PointNormal>::Ptr &cloud_target, 
+                                        const int &MaxIteration,
+                                        const float &Epsilon,
+                                        const float &MaxCorrespondenceDistance){
+    typename pcl::IterativeClosestPointNonLinear<pcl::PointNormal, pcl::PointNormal> icp;
+    icp.setMaximumIterations(MaxIteration);
+    icp.setEuclideanFitnessEpsilon(Epsilon);  // Convergence condition: The smaller the accuracy, the slower the convergence
+	icp.setMaxCorrespondenceDistance(MaxCorrespondenceDistance);
+    icp.setInputSource(cloud_source);      
+    icp.setInputTarget(cloud_target); 
+    icp.align(*cloud_source);  
+    Eigen::Matrix4f SourceToTarget = Eigen::Matrix4f::Identity();
+    if(icp.hasConverged()){
+        std::cout << "\nICP has converged, score is " << icp.getFitnessScore () << std::endl;
+        std::cout << "Transformation matrix:" << std::endl;
+        SourceToTarget = icp.getFinalTransformation();
+        std::cout << SourceToTarget << std::endl;
+    }
+    return std::make_tuple(cloud_source, SourceToTarget);
 }
 
 template<typename PointT>  //ICP plane-to-plane
- typename pcl::PointCloud<PointT>::Ptr Registration<PointT>::ICP_Plane2Plane(const typename pcl::PointCloud<PointT>::Ptr &cloud_source,
-                                                                     const typename pcl::PointCloud<PointT>::Ptr &cloud_target, 
-                                                                     const int &MaxIteration){
-    typename pcl::PointCloud<PointT>::Ptr cloud_ICP(new pcl::PointCloud<PointT>);
+ std::tuple<typename pcl::PointCloud<PointT>::Ptr, Eigen::Matrix4f> 
+ Registration<PointT>::ICP_Plane2Plane( const typename pcl::PointCloud<PointT>::Ptr &cloud_source,
+                                        const typename pcl::PointCloud<PointT>::Ptr &cloud_target, 
+                                        const int &MaxIteration,
+                                        const float &Epsilon,
+                                        const float &MaxCorrespondenceDistance){
     typename pcl::GeneralizedIterativeClosestPoint<PointT, PointT> icp;
     icp.setMaximumIterations(MaxIteration);
-    icp.setEuclideanFitnessEpsilon(1e-6);  // Convergence condition: The smaller the accuracy, the slower the convergence
-	icp.setMaxCorrespondenceDistance(0.10);
+    icp.setEuclideanFitnessEpsilon(Epsilon);  // Convergence condition: The smaller the accuracy, the slower the convergence
+	icp.setMaxCorrespondenceDistance(MaxCorrespondenceDistance);
     icp.setInputSource(cloud_source);      
     icp.setInputTarget(cloud_target); 
-    icp.align(*cloud_ICP);  
-    std::cout << "\nICP has converged, score is " << icp.getFitnessScore () << std::endl;
-    return cloud_ICP;
+    icp.align(*cloud_source);  
+    Eigen::Matrix4f SourceToTarget = Eigen::Matrix4f::Identity();
+    if(icp.hasConverged()){
+        std::cout << "\nICP has converged, score is " << icp.getFitnessScore () << std::endl;
+        std::cout << "Transformation matrix:" << std::endl;
+        SourceToTarget = icp.getFinalTransformation();
+        std::cout << SourceToTarget << std::endl;
+    }
+    return std::make_tuple(cloud_source, SourceToTarget);
 }
 
 template<typename PointT>  //NDT Registration
- typename pcl::PointCloud<PointT>::Ptr Registration<PointT>::NDT_Registration(const typename pcl::PointCloud<PointT>::Ptr &cloud_source,
-                                                                     const typename pcl::PointCloud<PointT>::Ptr &cloud_target, 
-                                                                     const float &tTransformationEpsilon,
-                                                                     const float &StepSize,
-                                                                     const float &Resolution,
-                                                                     const int &MaxIteration){
+ std::tuple<typename pcl::PointCloud<PointT>::Ptr, Eigen::Matrix4f> 
+ Registration<PointT>::NDT_Registration(const typename pcl::PointCloud<PointT>::Ptr &cloud_source,
+                                        const typename pcl::PointCloud<PointT>::Ptr &cloud_target, 
+                                        const float &tTransformationEpsilon,
+                                        const float &StepSize,
+                                        const float &Resolution,
+                                        const int &MaxIteration){
     pcl::NormalDistributionsTransform<PointT, PointT> NDT;
     NDT.setTransformationEpsilon(tTransformationEpsilon);
-	NDT.setStepSize(StepSize);           
-	NDT.setResolution(Resolution);        
-	NDT.setMaximumIterations(MaxIteration);
-	NDT.setInputSource(cloud_source); 
-	NDT.setInputTarget(cloud_target); 
-	NDT.align(*cloud_source);
-    std::cout << "\nICP has converged, score is " << NDT.getFitnessScore () << std::endl;
-    return cloud_source;
+    NDT.setStepSize(StepSize);           
+    NDT.setResolution(Resolution);        
+    NDT.setMaximumIterations(MaxIteration);
+    NDT.setInputSource(cloud_source); 
+    NDT.setInputTarget(cloud_target); 
+    NDT.align(*cloud_source);
+    Eigen::Matrix4f SourceToTarget = Eigen::Matrix4f::Identity();
+    if(NDT.hasConverged()){
+        std::cout << "NDP has converged, score is " << NDT.getFitnessScore () << std::endl;
+        std::cout << "Transformation matrix:" << std::endl;
+        SourceToTarget = NDT.getFinalTransformation();
+        std::cout << SourceToTarget << std::endl;
+    }
+    return std::make_tuple(cloud_source, SourceToTarget);
 }

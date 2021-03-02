@@ -107,6 +107,8 @@ pcl/registration/gicp.h
 -
 pcl/registration/ndt.h
 -
+pcl/registration/transforms.h
+-
 pcl/visualization/pcl_visualizer.h
 -
 
@@ -2498,6 +2500,10 @@ pcl/registration/transformation_estimation.h
 pcl/cloud_iterator.h
 -
 pcl/registration/impl/transformation_estimation_svd.hpp
+-
+
+/usr/include/pcl-1.8/pcl/registration/transforms.h
+pcl/common/transforms.h
 -
 
 /usr/include/pcl-1.8/pcl/registration/warp_point_rigid.h

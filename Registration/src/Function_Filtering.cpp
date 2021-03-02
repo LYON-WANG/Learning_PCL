@@ -13,7 +13,6 @@ template<typename PointT>
 typename pcl::PointCloud<PointT>::Ptr 
  Filters<PointT>::PassThroughFilter(  const typename pcl::PointCloud<PointT>::Ptr &cloud, 
                                         const std::__cxx11::string &axis, const std::array<float, 2> &limits){
-    // Create filtered object
     typename pcl::PointCloud<PointT>::Ptr cloud_filtered(new pcl::PointCloud<PointT>());
     pcl::PassThrough<PointT> passFilter;
     passFilter.setInputCloud(cloud);  // Set input point cloud 
