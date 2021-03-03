@@ -47,6 +47,7 @@
 #include <pcl/registration/icp_nl.h> // ICP Nolinear point-to-plane
 #include <pcl/registration/gicp.h>   // ICP plane-to-plane
 #include <pcl/registration/ndt.h>    // NDT Registration
+#include <pcl/registration/sample_consensus_prerejective.h>
 #include <pcl/registration/transforms.h> // Transformation matrix 
 
 // Visualization
@@ -67,6 +68,6 @@ public:
     std::tuple<typename pcl::PointCloud<pcl::PointNormal>::Ptr, Eigen::Matrix4f> ICP_Point2Plane(const typename pcl::PointCloud<pcl::PointNormal>::Ptr &cloud_source, const typename pcl::PointCloud<pcl::PointNormal>::Ptr &cloud_target, const int &MaxIteration, const float &Epsilon, const float &MaxCorrespondenceDistance); //ICP point-to-plane
     std::tuple<typename pcl::PointCloud<PointT>::Ptr, Eigen::Matrix4f> ICP_Plane2Plane(const typename pcl::PointCloud<PointT>::Ptr &cloud_source, const typename pcl::PointCloud<PointT>::Ptr &cloud_target, const int &MaxIteration, const float &Epsilon, const float &MaxCorrespondenceDistance); //ICP plane-to-plane
     std::tuple<typename pcl::PointCloud<PointT>::Ptr, Eigen::Matrix4f> NDT_Registration( const typename pcl::PointCloud<PointT>::Ptr &cloud_source, const typename pcl::PointCloud<PointT>::Ptr &cloud_target, const float &tTransformationEpsilon, const float &StepSize, const float &Resolution, const int &MaxIteration);
-    std::tuple<typename pcl::PointCloud<PointT>::Ptr, Eigen::Matrix4f> SAC_IA(); // Sample Consensus Initial Aligment
+    std::tuple<typename pcl::PointCloud<pcl::PointNormal>::Ptr, Eigen::Matrix4f> SAC_IA(const typename pcl::PointCloud<pcl::PointNormal>::Ptr &cloud_source, const typename pcl::PointCloud<pcl::PointNormal>::Ptr &cloud_target, const float &SearchRadius, const int &MaxIteration, const int &NumberOfSamples); // Sample Consensus Initial Aligment
 };
 #endif /* REGISTRATION_H_ */

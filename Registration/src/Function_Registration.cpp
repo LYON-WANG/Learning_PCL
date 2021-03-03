@@ -132,3 +132,46 @@ template<typename PointT>  //NDT Registration
     }
     return std::make_tuple(cloud_source, SourceToTarget);
 }
+
+template<typename PointT>  // Sample Consensus based Initial Alignment algorithm (SAC-IA)
+ std::tuple<typename pcl::PointCloud<pcl::PointNormal>::Ptr, Eigen::Matrix4f> 
+ Registration<PointT>::SAC_IA(  const typename pcl::PointCloud<pcl::PointNormal>::Ptr &cloud_source,
+                                const typename pcl::PointCloud<pcl::PointNormal>::Ptr &cloud_target, 
+                                const float &SearchRadius,
+                                const int &MaxIteration,
+                                const int &NumberOfSamples){
+    pcl::FPFHEstimationOMP<pcl::PointNormal, pcl::PointNormal, pcl::FPFHSignature33> FPFH;
+    pcl::PointCloud<pcl::FPFHSignature33>::Ptr source_features(new pcl::PointCloud<pcl::FPFHSignature33>);
+    pcl::PointCloud<pcl::FPFHSignature33>::Ptr target_features(new pcl::PointCloud<pcl::FPFHSignature33>);
+    FPFH.setRadiusSearch(SearchRadius);
+    FPFH.setInputCloud(cloud_source);
+    FPFH.setInputNormals(cloud_source);
+    FPFH.compute(*source_features);
+    FPFH.setInputCloud(cloud_target);
+    FPFH.setInputNormals(cloud_target);
+    FPFH.compute(*target_features);
+    // Sample Consensus Prerejective
+    pcl::SampleConsensusPrerejective<pcl::PointNormal, pcl::PointNormal, pcl::FPFHSignature33> SAC;
+    pcl::PointCloud<pcl::PointNormal>::Ptr cloud_aligned(new pcl::PointCloud<pcl::PointNormal>);
+    SAC.setInputSource(cloud_source); // Source
+    SAC.setSourceFeatures(source_features); //Source FPFH
+    SAC.setInputTarget(cloud_target); // Target
+    SAC.setTargetFeatures(target_features); //Target FPFH
+    //SAC.setMaximumIterations(MaxIteration);
+    //SAC.setNumberOfSamples(NumberOfSamples);
+    //SAC.setCorrespondenceRandomness(5);
+    //SAC.setSimilarityThreshold(0.9f);
+    //SAC.setMaxCorrespondenceDistance (2.5f * 0.005f);
+    //SAC.setInlierFraction (0.25f);
+    SAC.align (*cloud_aligned);
+    Eigen::Matrix4f SourceToTarget = Eigen::Matrix4f::Identity();
+    if(SAC.hasConverged()){
+        std::cout << "SAC-IA has converged, score is " << SAC.getFitnessScore () << std::endl;
+        std::cout << "Transformation matrix:" << std::endl;
+        SourceToTarget = SAC.getFinalTransformation();
+        std::cout << SourceToTarget << std::endl;
+    }
+    else 
+        std::cout << "Alignment failed!\n" << std::endl;
+    return std::make_tuple(cloud_aligned, SourceToTarget);
+ }

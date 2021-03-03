@@ -25,12 +25,13 @@ int main(int argc, char** argv){
     auto cloud_target_normal = registration.Normal_Estimation(cloud_target_down, 30);
 
     // ICP:
-    pcl::PointCloud<pcl::PointNormal>::Ptr cloud_ICP(new pcl::PointCloud<pcl::PointNormal>());
+    std::cout << "\n...Registration..." << std::endl;
+    pcl::PointCloud<pcl::PointNormal>::Ptr cloud_aligned(new pcl::PointCloud<pcl::PointNormal>());
     Eigen::Matrix4f TransMatrix;
-    std::tie(cloud_ICP, TransMatrix) = registration.ICP_Point2Plane(cloud_source_normal, cloud_target_normal, 100, 1e-6, 0.1);
-    // std::tie(cloud_ICP, TransMatrix) = registration.ICP_Plane2Plane(cloud_source_down, cloud_target_down, 100, 1e-6, 0.1);
-    // auto cloud_ICP = registration.NDT_Registration(cloud_source_down, cloud_target_down);
-    
+    //std::tie(cloud_aligned, TransMatrix) = registration.ICP_Point2Plane(cloud_source_normal, cloud_target_normal, 100, 1e-6, 0.1);
+    // std::tie(cloud_aligned, TransMatrix) = registration.ICP_Plane2Plane(cloud_source_down, cloud_target_down, 100, 1e-6, 0.1);
+    // auto cloud_aligned = registration.NDT_Registration(cloud_source_down, cloud_target_down);
+    std::tie(cloud_aligned, TransMatrix) = registration.SAC_IA(cloud_source_normal, cloud_target_normal, 0.05, 100, 3);
 
     // Visualization 
     // pcl::visualization::PCLVisualizer viewer("ICP TEST");
