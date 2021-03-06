@@ -35,12 +35,14 @@ std::tuple<std::vector<std::string>, int16_t>
     return std::make_tuple(filePaths, count);
 }
 
-double 
- timer_calculate(const std::chrono::_V2::system_clock::time_point &start_time){
+void 
+ timer_calculate(const std::chrono::_V2::system_clock::time_point &start_time,
+                 const std::string &function){
     // Should use "auto start_fast = std::chrono::system_clock::now()" to start timer.
     auto end_time = std::chrono::system_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
     double time_passed = (double) duration.count() * 
             std::chrono::microseconds::period::num / std::chrono::microseconds::period::den;
-    return time_passed; // [seconds]
+    //return time_passed; // [seconds]
+    std::cout << "[Timer] " << function <<" time used: " << time_passed << " [s]." << std::endl;
 }

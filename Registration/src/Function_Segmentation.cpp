@@ -38,10 +38,34 @@ std::tuple<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<Point
     EI.setIndices(inliers);
     EI.setNegative(true);
     EI.filter(*cloud_other);
-    std::cout << "Plane points: " << cloud_plane->points.size() << ", other points: " 
+    std::cout << "[PlaneSegmentation] Plane points: " << cloud_plane->points.size() << ", other points: " 
               << cloud_other->points.size() << std::endl;
     return std::make_tuple(cloud_plane, cloud_other);
- }
+}
+
+template<typename PointT>
+typename pcl::PointCloud<PointT>::Ptr 
+ Segmentation<PointT>::RoughGroundExtraction(const typename pcl::PointCloud<PointT>::Ptr &cloud, 
+                                             const float & height_threshold, 
+                                             const int & min_number){
+    typename pcl::PointCloud<PointT>::Ptr cloud_output(new pcl::PointCloud<PointT>());
+    float sum = 0.0f; 
+    int num = 0;         
+    for(int i = 0; (i < cloud->points.size()) && (num < min_number); i++){
+        sum += cloud->points[i].z; 
+        num ++;
+    } 
+    // Calulate average point height
+    float average_height = num != 0 ? sum/num : 0;
+    for(int i = 0; i < cloud->points.size(); i++){
+        if(cloud->points[i].z < average_height + height_threshold){
+            cloud_output->points.push_back(cloud->points[i]);
+        }
+    }
+    //std::cout << "Original points: " << cloud->points.size() << ", Output points: " 
+    //          << cloud_output->points.size() << std::endl;
+    return cloud_output;
+}
 
 template<typename PointT>
 std::tuple<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT>::Ptr> 
@@ -70,7 +94,7 @@ std::tuple<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<Point
     std::cout << "Plane points: " << cloud_plane->points.size() << ", other points: " 
               << cloud_other->points.size() << std::endl;
     return std::make_tuple(cloud_plane, cloud_other);
- }
+}
 
 template<typename PointT>
 std::vector<typename pcl::PointCloud<PointT>::Ptr> 

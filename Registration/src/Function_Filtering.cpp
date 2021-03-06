@@ -11,8 +11,9 @@
 
 template<typename PointT>
 typename pcl::PointCloud<PointT>::Ptr 
- Filters<PointT>::PassThroughFilter(  const typename pcl::PointCloud<PointT>::Ptr &cloud, 
-                                        const std::__cxx11::string &axis, const std::array<float, 2> &limits){
+ Filters<PointT>::PassThroughFilter(const typename pcl::PointCloud<PointT>::Ptr &cloud, 
+                                    const std::__cxx11::string &axis, 
+                                    const std::array<float, 2> &limits){
     typename pcl::PointCloud<PointT>::Ptr cloud_filtered(new pcl::PointCloud<PointT>());
     pcl::PassThrough<PointT> passFilter;
     passFilter.setInputCloud(cloud);  // Set input point cloud 
@@ -26,7 +27,8 @@ typename pcl::PointCloud<PointT>::Ptr
 
 template<typename PointT>
 typename pcl::PointCloud<PointT>::Ptr 
- Filters<PointT>::VoxelGridDownSampling( const typename pcl::PCLPointCloud2::Ptr &cloud2, const float &filterRes){
+ Filters<PointT>::VoxelGridDownSampling(const typename pcl::PCLPointCloud2::Ptr &cloud2, 
+                                        const float &filterRes){
     // DownSample the dataset using a given leaf size
     pcl::PCLPointCloud2::Ptr cloud2_filtered(new pcl::PCLPointCloud2()); // Create filtered object
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered(new pcl::PointCloud<PointT>());
@@ -42,7 +44,8 @@ typename pcl::PointCloud<PointT>::Ptr
 template<typename PointT>
 typename pcl::PointCloud<PointT>::Ptr 
  Filters<PointT>::StatisticalOutlierRemoval(const typename pcl::PointCloud<PointT>::Ptr &cloud, 
-                                            const int &meanK, const double &StddevMulThresh){
+                                            const int &meanK, 
+                                            const double &StddevMulThresh){
     typename pcl::PointCloud<PointT>::Ptr cloud_filtered(new pcl::PointCloud<PointT>());
     pcl::StatisticalOutlierRemoval<PointT> sor;
     sor.setInputCloud(cloud);
@@ -58,7 +61,8 @@ typename pcl::PointCloud<PointT>::Ptr
 template<typename PointT>
 typename pcl::PointCloud<PointT>::Ptr 
  Filters<PointT>::RadiusOutlierRemoval( const typename pcl::PointCloud<PointT>::Ptr &cloud, 
-                                        const double &Radius, const int &MinNeighborsInRadius){
+                                        const double &Radius, 
+                                        const int &MinNeighborsInRadius){
     typename pcl::PointCloud<PointT>::Ptr cloud_filtered(new pcl::PointCloud<PointT>());
     pcl::RadiusOutlierRemoval<PointT> ror;
     ror.setInputCloud(cloud);

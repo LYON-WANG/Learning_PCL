@@ -5,8 +5,11 @@ CMakeFiles/Registration.dir/src/Registration.cpp.o
  /home/leo/Learning_PCL/Registration/src/Filtering.h
  /home/leo/Learning_PCL/Registration/src/Function_Filtering.cpp
  /home/leo/Learning_PCL/Registration/src/Function_Registration.cpp
+ /home/leo/Learning_PCL/Registration/src/Function_Segmentation.cpp
  /home/leo/Learning_PCL/Registration/src/Registration.cpp
  /home/leo/Learning_PCL/Registration/src/Registration.h
+ /home/leo/Learning_PCL/Registration/src/Segmentation.h
+ /home/leo/Learning_PCL/Registration/src/supportFunction.cpp
  /usr/include/eigen3/Eigen/Cholesky
  /usr/include/eigen3/Eigen/Core
  /usr/include/eigen3/Eigen/Dense
@@ -250,6 +253,7 @@ CMakeFiles/Registration.dir/src/Registration.cpp.o
  /usr/include/pcl-1.8/pcl/common/common.h
  /usr/include/pcl-1.8/pcl/common/concatenate.h
  /usr/include/pcl-1.8/pcl/common/copy_point.h
+ /usr/include/pcl-1.8/pcl/common/distances.h
  /usr/include/pcl-1.8/pcl/common/eigen.h
  /usr/include/pcl-1.8/pcl/common/impl/accumulators.hpp
  /usr/include/pcl-1.8/pcl/common/impl/centroid.hpp
@@ -287,12 +291,14 @@ CMakeFiles/Registration.dir/src/Registration.cpp.o
  /usr/include/pcl-1.8/pcl/filters/impl/extract_indices.hpp
  /usr/include/pcl-1.8/pcl/filters/impl/filter.hpp
  /usr/include/pcl-1.8/pcl/filters/impl/filter_indices.hpp
+ /usr/include/pcl-1.8/pcl/filters/impl/morphological_filter.hpp
  /usr/include/pcl-1.8/pcl/filters/impl/passthrough.hpp
  /usr/include/pcl-1.8/pcl/filters/impl/radius_outlier_removal.hpp
  /usr/include/pcl-1.8/pcl/filters/impl/statistical_outlier_removal.hpp
  /usr/include/pcl-1.8/pcl/filters/impl/uniform_sampling.hpp
  /usr/include/pcl-1.8/pcl/filters/impl/voxel_grid.hpp
  /usr/include/pcl-1.8/pcl/filters/impl/voxel_grid_covariance.hpp
+ /usr/include/pcl-1.8/pcl/filters/morphological_filter.h
  /usr/include/pcl-1.8/pcl/filters/passthrough.h
  /usr/include/pcl-1.8/pcl/filters/radius_outlier_removal.h
  /usr/include/pcl-1.8/pcl/filters/statistical_outlier_removal.h
@@ -375,13 +381,54 @@ CMakeFiles/Registration.dir/src/Registration.cpp.o
  /usr/include/pcl-1.8/pcl/registration/warp_point_rigid_6d.h
  /usr/include/pcl-1.8/pcl/sample_consensus/boost.h
  /usr/include/pcl-1.8/pcl/sample_consensus/eigen.h
+ /usr/include/pcl-1.8/pcl/sample_consensus/impl/lmeds.hpp
+ /usr/include/pcl-1.8/pcl/sample_consensus/impl/mlesac.hpp
+ /usr/include/pcl-1.8/pcl/sample_consensus/impl/msac.hpp
+ /usr/include/pcl-1.8/pcl/sample_consensus/impl/prosac.hpp
  /usr/include/pcl-1.8/pcl/sample_consensus/impl/ransac.hpp
+ /usr/include/pcl-1.8/pcl/sample_consensus/impl/rmsac.hpp
+ /usr/include/pcl-1.8/pcl/sample_consensus/impl/rransac.hpp
+ /usr/include/pcl-1.8/pcl/sample_consensus/impl/sac_model_circle.hpp
+ /usr/include/pcl-1.8/pcl/sample_consensus/impl/sac_model_circle3d.hpp
+ /usr/include/pcl-1.8/pcl/sample_consensus/impl/sac_model_cone.hpp
+ /usr/include/pcl-1.8/pcl/sample_consensus/impl/sac_model_cylinder.hpp
+ /usr/include/pcl-1.8/pcl/sample_consensus/impl/sac_model_line.hpp
+ /usr/include/pcl-1.8/pcl/sample_consensus/impl/sac_model_normal_parallel_plane.hpp
+ /usr/include/pcl-1.8/pcl/sample_consensus/impl/sac_model_normal_plane.hpp
+ /usr/include/pcl-1.8/pcl/sample_consensus/impl/sac_model_normal_sphere.hpp
+ /usr/include/pcl-1.8/pcl/sample_consensus/impl/sac_model_parallel_line.hpp
+ /usr/include/pcl-1.8/pcl/sample_consensus/impl/sac_model_parallel_plane.hpp
+ /usr/include/pcl-1.8/pcl/sample_consensus/impl/sac_model_perpendicular_plane.hpp
+ /usr/include/pcl-1.8/pcl/sample_consensus/impl/sac_model_plane.hpp
  /usr/include/pcl-1.8/pcl/sample_consensus/impl/sac_model_registration.hpp
+ /usr/include/pcl-1.8/pcl/sample_consensus/impl/sac_model_sphere.hpp
+ /usr/include/pcl-1.8/pcl/sample_consensus/impl/sac_model_stick.hpp
+ /usr/include/pcl-1.8/pcl/sample_consensus/lmeds.h
+ /usr/include/pcl-1.8/pcl/sample_consensus/method_types.h
+ /usr/include/pcl-1.8/pcl/sample_consensus/mlesac.h
  /usr/include/pcl-1.8/pcl/sample_consensus/model_types.h
+ /usr/include/pcl-1.8/pcl/sample_consensus/msac.h
+ /usr/include/pcl-1.8/pcl/sample_consensus/prosac.h
  /usr/include/pcl-1.8/pcl/sample_consensus/ransac.h
+ /usr/include/pcl-1.8/pcl/sample_consensus/rmsac.h
+ /usr/include/pcl-1.8/pcl/sample_consensus/rransac.h
  /usr/include/pcl-1.8/pcl/sample_consensus/sac.h
  /usr/include/pcl-1.8/pcl/sample_consensus/sac_model.h
+ /usr/include/pcl-1.8/pcl/sample_consensus/sac_model_circle.h
+ /usr/include/pcl-1.8/pcl/sample_consensus/sac_model_circle3d.h
+ /usr/include/pcl-1.8/pcl/sample_consensus/sac_model_cone.h
+ /usr/include/pcl-1.8/pcl/sample_consensus/sac_model_cylinder.h
+ /usr/include/pcl-1.8/pcl/sample_consensus/sac_model_line.h
+ /usr/include/pcl-1.8/pcl/sample_consensus/sac_model_normal_parallel_plane.h
+ /usr/include/pcl-1.8/pcl/sample_consensus/sac_model_normal_plane.h
+ /usr/include/pcl-1.8/pcl/sample_consensus/sac_model_normal_sphere.h
+ /usr/include/pcl-1.8/pcl/sample_consensus/sac_model_parallel_line.h
+ /usr/include/pcl-1.8/pcl/sample_consensus/sac_model_parallel_plane.h
+ /usr/include/pcl-1.8/pcl/sample_consensus/sac_model_perpendicular_plane.h
+ /usr/include/pcl-1.8/pcl/sample_consensus/sac_model_plane.h
  /usr/include/pcl-1.8/pcl/sample_consensus/sac_model_registration.h
+ /usr/include/pcl-1.8/pcl/sample_consensus/sac_model_sphere.h
+ /usr/include/pcl-1.8/pcl/sample_consensus/sac_model_stick.h
  /usr/include/pcl-1.8/pcl/search/impl/kdtree.hpp
  /usr/include/pcl-1.8/pcl/search/impl/organized.hpp
  /usr/include/pcl-1.8/pcl/search/impl/search.hpp
@@ -390,6 +437,12 @@ CMakeFiles/Registration.dir/src/Registration.cpp.o
  /usr/include/pcl-1.8/pcl/search/organized.h
  /usr/include/pcl-1.8/pcl/search/pcl_search.h
  /usr/include/pcl-1.8/pcl/search/search.h
+ /usr/include/pcl-1.8/pcl/segmentation/extract_clusters.h
+ /usr/include/pcl-1.8/pcl/segmentation/impl/extract_clusters.hpp
+ /usr/include/pcl-1.8/pcl/segmentation/impl/progressive_morphological_filter.hpp
+ /usr/include/pcl-1.8/pcl/segmentation/impl/sac_segmentation.hpp
+ /usr/include/pcl-1.8/pcl/segmentation/progressive_morphological_filter.h
+ /usr/include/pcl-1.8/pcl/segmentation/sac_segmentation.h
  /usr/include/pcl-1.8/pcl/visualization/area_picking_event.h
  /usr/include/pcl-1.8/pcl/visualization/boost.h
  /usr/include/pcl-1.8/pcl/visualization/cloud_viewer.h

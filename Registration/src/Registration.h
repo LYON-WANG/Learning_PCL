@@ -17,6 +17,7 @@
 #include <cstdlib>
 #include <chrono>
 #include <dirent.h>
+#include<algorithm>
 
 // Eigen
 //#include <Eigen/Dense>
@@ -52,6 +53,7 @@
 
 // Visualization
 #include <pcl/visualization/pcl_visualizer.h>
+
 
 template<typename PointT>
 class Registration{
