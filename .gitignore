@@ -10,3 +10,6 @@ Segmentation/src/.vscode
 Registration/bin
 Registration/build
 Registration/src/.vscode
+RealTimeTest/bin
+RealTimeTest/build
+RealTimeTest/src/.vscode
