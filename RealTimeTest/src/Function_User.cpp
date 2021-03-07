@@ -10,7 +10,7 @@
  */
 template<typename PointT>
 std::tuple<std::vector<std::string>, int16_t> 
- User<PointT>::load_file(const std::string &folderPath){
+ User<PointT>::loadFile (const std::string &folderPath){
     // Count the total number of files in the path and return the path of all files.
     std::vector<std::string> filePaths; 
     DIR *path;
@@ -37,20 +37,20 @@ std::tuple<std::vector<std::string>, int16_t>
 
 template<typename PointT>
 void 
- User<PointT>::timer_calculate(const std::chrono::_V2::system_clock::time_point &start_time,
-                                  const std::string &function){
+ User<PointT>::timerCalculator (const std::chrono::_V2::system_clock::time_point &start_time,
+                                const std::string &function){
     // Should use "auto start_fast = std::chrono::system_clock::now()" to start timer.
     auto end_time = std::chrono::system_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
     double time_passed = (double) duration.count() * 
             std::chrono::microseconds::period::num / std::chrono::microseconds::period::den;
-    std::cout << "[Timer] " << function <<" time used: " << time_passed << " [s]." << std::endl;
+    std::cout << "[--Timer--] " << function <<" time used: " << time_passed << " [s]." << std::endl;
     //return time_passed; // [seconds]
 }
 
 template<typename PointT>
 typename pcl::PCLPointCloud2::Ptr
- User<PointT>::load_pcd(const std::vector<std::string> &filePaths, 
+ User<PointT>::loadPCD(const std::vector<std::string> &filePaths, 
                           const int16_t &NUM){
     // Load .pcd file
     pcl::PCDReader fileReader;

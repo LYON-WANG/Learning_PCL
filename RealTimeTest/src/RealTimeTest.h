@@ -98,7 +98,6 @@ public:
     typename pcl::PointCloud<PointT>::Ptr StatisticalOutlierRemoval( const typename pcl::PointCloud<PointT>::Ptr &cloud, const int &meanK, const double &StddevMulThresh );
     typename pcl::PointCloud<PointT>::Ptr RadiusOutlierRemoval( const typename pcl::PointCloud<PointT>::Ptr &cloud, const double &Radius, const int &MinNeighborsInRadius );
     typename pcl::PointCloud<PointT>::Ptr UniformSampling( const typename pcl::PointCloud<PointT>::Ptr &cloud, const float &SearchRadius);
-    typename pcl::PointCloud<PointT>::Ptr IndicesExtract( const typename pcl::PointCloud<PointT>::Ptr &cloud, boost::shared_ptr<const PointT> &indices);
 };
 /*---------------------------------------------------------------------------*/
 template<typename PointT>
@@ -122,9 +121,10 @@ public:
     // Destructor
     ~Segmentation() = default;
     
-    std::tuple<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT>::Ptr> PlaneSegmentation( const typename pcl::PointCloud<PointT>::Ptr &cloud, const int &maxIterations, const float &distanceThreshold);
-    std::tuple<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT>::Ptr> ProgressiveMorphologicalSegmentation( const typename pcl::PointCloud<PointT>::Ptr &cloud, const int &MaxWindowSize, const float &Slope, const float &InitialDistance, const float &MaxDistance);
+    typename pcl::PointCloud<PointT>::Ptr IndicesExtract( const typename pcl::PointCloud<PointT>::Ptr &cloud, pcl::PointIndices::Ptr &indices, const bool &set_negative = false);
     typename pcl::PointCloud<PointT>::Ptr RoughGroundExtraction( const typename pcl::PointCloud<PointT>::Ptr &cloud, const float & height_threshold, const int & min_number);
+    std::tuple<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT>::Ptr> PlaneSegmentation( const typename pcl::PointCloud<PointT>::Ptr &original_cloud, const typename pcl::PointCloud<PointT>::Ptr &rough_ground_cloud, const int &maxIterations, const float &distanceThreshold);
+    std::tuple<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT>::Ptr> ProgressiveMorphologicalSegmentation( const typename pcl::PointCloud<PointT>::Ptr &cloud, const int &MaxWindowSize, const float &Slope, const float &InitialDistance, const float &MaxDistance);
     std::vector<typename pcl::PointCloud<PointT>::Ptr> EuclideanClustering( const typename pcl::PointCloud<PointT>::Ptr &cloud, const float &ClusterTolerance, const int &MinSize, const int &MaxSize);
     Box DrawBoundingBox( const typename pcl::PointCloud<PointT>::Ptr& cluster);
 };
@@ -155,9 +155,9 @@ public:
     // Destructor
     ~User() = default;
     
-    std::tuple<std::vector<std::string>, int16_t> load_file(const std::string &folderPath);
-    void timer_calculate(const std::chrono::_V2::system_clock::time_point &start_time, const std::string &function);
-    pcl::PCLPointCloud2::Ptr load_pcd(const std::vector<std::string> &filePaths, const int16_t &NUM);
+    std::tuple<std::vector<std::string>, int16_t> loadFile(const std::string &folderPath);
+    void timerCalculator(const std::chrono::_V2::system_clock::time_point &start_time, const std::string &function);
+    pcl::PCLPointCloud2::Ptr loadPCD(const std::vector<std::string> &filePaths, const int16_t &NUM);
     void showPointcloud(pcl::visualization::PCLVisualizer &viewer, typename pcl::PointCloud<PointT>::Ptr &cloud, const int &point_size, const Color &color, const std::string &name);
     void initCamera(pcl::visualization::PCLVisualizer &viewer, const Color &background_color, const CameraAngle &camera_angle);
 };

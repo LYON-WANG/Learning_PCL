@@ -87,15 +87,3 @@ typename pcl::PointCloud<PointT>::Ptr
               << cloud->points.size() <<  ", Filtered points: " << cloud_filtered->points.size() << std::endl;
     return cloud_filtered;
  } // Uniform sampling: Keep one point in the radius sphere (center of gravity point)
-
-template<typename PointT>
-typename pcl::PointCloud<PointT>::Ptr 
- Filters<PointT>::IndicesExtract(const typename pcl::PointCloud<PointT>::Ptr &cloud, boost::shared_ptr<const PointT> &indices){
-    typename pcl::PointCloud<PointT>::Ptr cloud_output(new pcl::PointCloud<PointT>());
-    pcl::ExtractIndices<PointT> ei;
-    ei.setInputCloud(cloud);
-    ei.setIndices(indices);
-    // ei.setNegative(true);
-    ei.filter(*cloud_output);
-    return cloud_output;
- }
