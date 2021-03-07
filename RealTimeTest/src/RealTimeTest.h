@@ -57,6 +57,11 @@
 // Visualization
 #include <pcl/visualization/pcl_visualizer.h>
 
+#define RED   Color(1, 0, 0)
+#define GREEN Color(0, 1, 0)
+#define BLACK Color(0, 0, 0)
+#define WHITE Color(1, 1, 1)
+
 struct Box{
 	float x_min;
 	float y_min;
@@ -68,8 +73,18 @@ struct Box{
 
 bool point_cmp(pcl::PointXYZ a, pcl::PointXYZ b){
     return a.z<b.z;
-}
+};
 
+enum CameraAngle {TOP, FPS, SIDE};
+
+struct Color{
+    float R, G, B;
+
+	Color(float setR, float setG, float setB)
+		: R(setR), G(setG), B(setB)
+	{}
+};
+/*---------------------------------------------------------------------------*/
 template<typename PointT>
 class Filters{
 public:
@@ -85,7 +100,7 @@ public:
     typename pcl::PointCloud<PointT>::Ptr UniformSampling( const typename pcl::PointCloud<PointT>::Ptr &cloud, const float &SearchRadius);
     typename pcl::PointCloud<PointT>::Ptr IndicesExtract( const typename pcl::PointCloud<PointT>::Ptr &cloud, boost::shared_ptr<const PointT> &indices);
 };
-
+/*---------------------------------------------------------------------------*/
 template<typename PointT>
 class Features{
 public:
@@ -97,7 +112,7 @@ public:
     
     typename pcl::PointCloud<pcl::PointNormal>::Ptr Normal_Estimation(const typename pcl::PointCloud<PointT>::Ptr &cloud, const int &KSearch); // Estimate normal of point cloud
 };
-
+/*---------------------------------------------------------------------------*/
 template<typename PointT>
 class Segmentation{
 public:
@@ -113,7 +128,7 @@ public:
     std::vector<typename pcl::PointCloud<PointT>::Ptr> EuclideanClustering( const typename pcl::PointCloud<PointT>::Ptr &cloud, const float &ClusterTolerance, const int &MinSize, const int &MaxSize);
     Box DrawBoundingBox( const typename pcl::PointCloud<PointT>::Ptr& cluster);
 };
-
+/*---------------------------------------------------------------------------*/
 template<typename PointT>
 class Registration{
 public:
@@ -130,20 +145,21 @@ public:
     std::tuple<typename pcl::PointCloud<PointT>::Ptr, Eigen::Matrix4f> NDT_Registration( const typename pcl::PointCloud<PointT>::Ptr &cloud_source, const typename pcl::PointCloud<PointT>::Ptr &cloud_target, const float &tTransformationEpsilon, const float &StepSize, const float &Resolution, const int &MaxIteration);
     std::tuple<typename pcl::PointCloud<pcl::PointNormal>::Ptr, Eigen::Matrix4f> SAC_IA(const typename pcl::PointCloud<pcl::PointNormal>::Ptr &cloud_source, const typename pcl::PointCloud<pcl::PointNormal>::Ptr &cloud_target, const float &SearchRadius, const int &MaxIteration, const int &NumberOfSamples); // Sample Consensus Initial Aligment
 };
-
+/*---------------------------------------------------------------------------*/
 template<typename PointT>
-class Support{
+class User{
 public:
     // Constructor
-    Support() = default;
+    User() = default;
 
     // Destructor
-    ~Support() = default;
+    ~User() = default;
     
     std::tuple<std::vector<std::string>, int16_t> load_file(const std::string &folderPath);
     void timer_calculate(const std::chrono::_V2::system_clock::time_point &start_time, const std::string &function);
     pcl::PCLPointCloud2::Ptr load_pcd(const std::vector<std::string> &filePaths, const int16_t &NUM);
-    void show_pointcloud(const pcl::visualization::PCLVisualizer &viewer, typename pcl::PointCloud<PointT>::Ptr &cloud, const std::string &name);
+    void showPointcloud(pcl::visualization::PCLVisualizer &viewer, typename pcl::PointCloud<PointT>::Ptr &cloud, const int &point_size, const Color &color, const std::string &name);
+    void initCamera(pcl::visualization::PCLVisualizer &viewer, const Color &background_color, const CameraAngle &camera_angle);
 };
 
 #endif /* REALTIMETEST_H_ */

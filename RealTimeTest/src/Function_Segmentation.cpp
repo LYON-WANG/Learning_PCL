@@ -11,9 +11,9 @@
 
 template<typename PointT>
 std::tuple<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT>::Ptr> 
- Segmentation<PointT>::PlaneSegmentation(const typename pcl::PointCloud<PointT>::Ptr &cloud, 
-                                         const int &maxIterations, 
-                                         const float &distanceThreshold) {
+ Segmentation<PointT>::PlaneSegmentation (const typename pcl::PointCloud<PointT>::Ptr &cloud, 
+                                          const int &maxIterations, 
+                                          const float &distanceThreshold) {
     pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
     pcl::PointIndices::Ptr inliers (new pcl::PointIndices); // defeine plane inliers
     pcl::SACSegmentation<PointT> seg;
@@ -45,9 +45,9 @@ std::tuple<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<Point
 
 template<typename PointT>
 typename pcl::PointCloud<PointT>::Ptr 
- Segmentation<PointT>::RoughGroundExtraction(const typename pcl::PointCloud<PointT>::Ptr &cloud, 
-                                             const float & height_threshold, 
-                                             const int & min_number){
+ Segmentation<PointT>::RoughGroundExtraction (const typename pcl::PointCloud<PointT>::Ptr &cloud, 
+                                              const float & height_threshold, 
+                                              const int & min_number){
     typename pcl::PointCloud<PointT>::Ptr cloud_output(new pcl::PointCloud<PointT>());
     float sum = 0.0f; 
     int num = 0;         
@@ -69,11 +69,11 @@ typename pcl::PointCloud<PointT>::Ptr
 
 template<typename PointT>
 std::tuple<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT>::Ptr> 
- Segmentation<PointT>::ProgressiveMorphologicalSegmentation(const typename pcl::PointCloud<PointT>::Ptr &cloud, 
-                                                            const int &MaxWindowSize, 
-                                                            const float &Slope, 
-                                                            const float &InitialDistance, 
-                                                            const float &MaxDistance){
+ Segmentation<PointT>::ProgressiveMorphologicalSegmentation (const typename pcl::PointCloud<PointT>::Ptr &cloud, 
+                                                             const int &MaxWindowSize, 
+                                                             const float &Slope, 
+                                                             const float &InitialDistance, 
+                                                             const float &MaxDistance){
     typename pcl::PointCloud<PointT>::Ptr cloud_plane(new pcl::PointCloud<PointT>());
     typename pcl::PointCloud<PointT>::Ptr cloud_other(new pcl::PointCloud<PointT>());
     pcl::PointIndicesPtr ground(new pcl::PointIndices);
@@ -98,7 +98,7 @@ std::tuple<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<Point
 
 template<typename PointT>
 std::vector<typename pcl::PointCloud<PointT>::Ptr> 
- Segmentation<PointT>::EuclideanClustering( const typename pcl::PointCloud<PointT>::Ptr &cloud, 
+ Segmentation<PointT>::EuclideanClustering (const typename pcl::PointCloud<PointT>::Ptr &cloud, 
                                             const float &ClusterTolerance,
                                             const int &MinSize, 
                                             const int &MaxSize){
@@ -130,7 +130,7 @@ std::vector<typename pcl::PointCloud<PointT>::Ptr>
 
 template<typename PointT>
 Box 
- Segmentation<PointT>::DrawBoundingBox(const typename pcl::PointCloud<PointT>::Ptr& cluster) {
+ Segmentation<PointT>::DrawBoundingBox (const typename pcl::PointCloud<PointT>::Ptr& cluster) {
     // Find bounding box for one of the clusters
     PointT minPoint; 
     PointT maxPoint;
