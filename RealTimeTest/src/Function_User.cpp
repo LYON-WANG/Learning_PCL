@@ -92,3 +92,20 @@ void
     viewer.setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, point_size, name);
     viewer.setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_COLOR, color.R, color.G, color.B, name);
 }
+
+template<typename PointT>
+void
+ User<PointT>::drawBoundingBox (pcl::visualization::PCLVisualizer &viewer, Box box, 
+                                int box_id, Color color, 
+                                float opacity){
+    std::string cube_ID = "box" + std::to_string(box_id);
+    viewer.addCube(box.x_min, box.x_max, box.y_min, box.y_max, box.z_min, box.z_max, color.R, color.G, color.B, cube_ID);
+    viewer.setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_REPRESENTATION, pcl::visualization::PCL_VISUALIZER_REPRESENTATION_WIREFRAME, cube_ID); 
+    viewer.setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_COLOR, color.R, color.G, color.B, cube_ID);
+    viewer.setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_OPACITY, opacity, cube_ID);
+    std::string cube_fill = "fill" + std::to_string(box_id);
+    viewer.addCube(box.x_min, box.x_max, box.y_min, box.y_max, box.z_min, box.z_max, color.R, color.G, color.B, cube_fill);
+    viewer.setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_REPRESENTATION, pcl::visualization::PCL_VISUALIZER_REPRESENTATION_SURFACE, cube_fill); 
+    viewer.setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_COLOR, color.R, color.G, color.B, cube_fill);
+    viewer.setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_OPACITY, opacity*0.5, cube_fill);
+}

@@ -124,10 +124,10 @@ public:
     
     typename pcl::PointCloud<PointT>::Ptr indicesExtract( const typename pcl::PointCloud<PointT>::Ptr &cloud, pcl::PointIndices::Ptr &indices, const bool &set_negative = false);
     typename pcl::PointCloud<PointT>::Ptr RoughGroundExtraction( const typename pcl::PointCloud<PointT>::Ptr &cloud, const float & height_threshold, const int & min_number);
-    std::tuple<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT>::Ptr> PlaneSegmentation( const typename pcl::PointCloud<PointT>::Ptr &original_cloud, const typename pcl::PointCloud<PointT>::Ptr &rough_ground_cloud, const int &maxIterations, const float &distanceThreshold);
+    std::tuple<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT>::Ptr> PlaneSegmentationRANSAC( const typename pcl::PointCloud<PointT>::Ptr &original_cloud, const typename pcl::PointCloud<PointT>::Ptr &rough_ground_cloud, const int &maxIterations, const float &distanceThreshold);
     std::tuple<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT>::Ptr> ProgressiveMorphologicalSegmentation( const typename pcl::PointCloud<PointT>::Ptr &cloud, const int &MaxWindowSize, const float &Slope, const float &InitialDistance, const float &MaxDistance);
     std::vector<typename pcl::PointCloud<PointT>::Ptr> EuclideanClustering( const typename pcl::PointCloud<PointT>::Ptr &cloud, const float &ClusterTolerance, const int &MinSize, const int &MaxSize);
-    Box DrawBoundingBox( const typename pcl::PointCloud<PointT>::Ptr& cluster);
+    Box findBoundingBox ( const typename pcl::PointCloud<PointT>::Ptr& cluster);
 };
 /*---------------------------------------------------------------------------*/
 template<typename PointT>
@@ -161,6 +161,7 @@ public:
     pcl::PCLPointCloud2::Ptr loadPCD(const std::vector<std::string> &filePaths, const int16_t &NUM);
     void showPointcloud(pcl::visualization::PCLVisualizer &viewer, typename pcl::PointCloud<PointT>::Ptr &cloud, const int &point_size, const Color &color, const std::string &name);
     void initCamera(pcl::visualization::PCLVisualizer &viewer, const Color &background_color, const CameraAngle &camera_angle);
+    void drawBoundingBox (pcl::visualization::PCLVisualizer &viewer, Box box, int box_id, Color color, float opacity);
 };
 
 #endif /* REALTIMETEST_H_ */

@@ -49,7 +49,7 @@ typename pcl::PointCloud<PointT>::Ptr
 
 template<typename PointT>
 std::tuple<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT>::Ptr> 
- Segmentation<PointT>::PlaneSegmentation (const typename pcl::PointCloud<PointT>::Ptr &original_cloud, 
+ Segmentation<PointT>::PlaneSegmentationRANSAC (const typename pcl::PointCloud<PointT>::Ptr &original_cloud, 
                                           const typename pcl::PointCloud<PointT>::Ptr &rough_ground_cloud, 
                                           const int &maxIterations, 
                                           const float &distanceThreshold) {
@@ -138,7 +138,7 @@ std::vector<typename pcl::PointCloud<PointT>::Ptr>
 
 template<typename PointT>
 Box 
- Segmentation<PointT>::DrawBoundingBox (const typename pcl::PointCloud<PointT>::Ptr& cluster) {
+ Segmentation<PointT>::findBoundingBox (const typename pcl::PointCloud<PointT>::Ptr& cluster) {
     // Find bounding box for one of the clusters
     PointT minPoint; 
     PointT maxPoint;

@@ -1,7 +1,4 @@
-/* \author Leo Wang */
-// Real-time object-detection, plane segmentation and registration test
-// using PCL
-
+// Real-time object-detection, plane segmentation and registration test using PCL
 /**
  * Developer: Leo Wang
  * E-mail:    liangyu@student.chalmers.se
@@ -38,7 +35,7 @@ int main(int argc, char** argv){
     while(NUM != fileNum){
         if(DISPLAY == true){ // Clear viewer
             viewer.removeAllPointClouds();
-            //viewer.removeAllShapes();
+            viewer.removeAllShapes();
         }
         std::cout << "Frame [" << NUM << "]:" << std::endl;
         auto start_frame = std::chrono::system_clock::now();// Start frame timer
@@ -46,7 +43,7 @@ int main(int argc, char** argv){
 
         /*------ 2. Down Sampling ------*/
         auto timer_downsampling = std::chrono::system_clock::now(); // Start down sampling timer
-        auto cloud_source_down = filter.VoxelGridDownSampling(cloud, 0.2f); // PCLPointCloud2 --> pcl::PointXYZ
+        auto cloud_source_down = filter.VoxelGridDownSampling(cloud, 0.3f); // PCLPointCloud2 --> pcl::PointXYZ
         user.timerCalculator(timer_downsampling, "Down Sampling"); // Print time
 
         /*------ 2. Statistical Outlier Removal ------*/
@@ -66,9 +63,27 @@ int main(int argc, char** argv){
         pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_other(new pcl::PointCloud<pcl::PointXYZ>());
         pcl::PointIndices::Ptr inliers (new pcl::PointIndices); // Plane inliers
         auto timer_RAS = std::chrono::system_clock::now(); // Start RANSAC timer
-        std::tie(cloud_road, cloud_other) = segmentation.PlaneSegmentation(cloud_source_down, RoughGroundPoints, 150, 0.3);
+        std::tie(cloud_road, cloud_other) = segmentation.PlaneSegmentationRANSAC(cloud_source_down, RoughGroundPoints, 150, 0.3);
         user.timerCalculator(timer_RAS, "RANSAC Segmentation");
         user.timerCalculator(timer_plane, "Total plane Segmentation");
+
+        /*------ Statistical Outlier Removal ------*/
+        auto timer_outlier = std::chrono::system_clock::now(); // Start timer
+        cloud_other = filter.StatisticalOutlierRemoval(cloud_other, 30, 2.0);
+        user.timerCalculator(timer_outlier, "Outlier Removal");  // Around 30 ms
+
+        /*------ 4. Object Detection ------*/
+        auto timer_clustering = std::chrono::system_clock::now(); // Start RANSAC timer
+        auto cloud_clusters = segmentation.EuclideanClustering(cloud_other, 0.35, 20, 400);
+        int cluster_ID = 1;
+        for(const auto &cluster : cloud_clusters){
+            Box box = segmentation.findBoundingBox(cluster);
+            user.drawBoundingBox(viewer, box, cluster_ID, BLUE, 0.8);
+            cluster_ID++;
+        }
+        user.timerCalculator(timer_clustering, "Euclidean Clustering");
+
+        /*------ 5. Registration ------*/
 
         /*------ Visualization ------*/
         if(DISPLAY == true){
