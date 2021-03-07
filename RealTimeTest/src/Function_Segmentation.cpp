@@ -11,7 +11,7 @@
 
 template<typename PointT>
 typename pcl::PointCloud<PointT>::Ptr 
- Segmentation<PointT>::IndicesExtract(const typename pcl::PointCloud<PointT>::Ptr &cloud, 
+ Segmentation<PointT>::indicesExtract(const typename pcl::PointCloud<PointT>::Ptr &cloud, 
                                  pcl::PointIndices::Ptr &indices,
                                  const bool &set_negative){
     typename pcl::PointCloud<PointT>::Ptr cloud_output(new pcl::PointCloud<PointT>());
@@ -67,16 +67,9 @@ std::tuple<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<Point
         PCL_ERROR ("Could not estimate a planar model for the given dataset.");
     typename pcl::PointCloud<PointT>::Ptr cloud_plane(new pcl::PointCloud<PointT>());
     typename pcl::PointCloud<PointT>::Ptr cloud_other(new pcl::PointCloud<PointT>());
-    // Copy inliers point cloud as plane
-    for (int index : inliers -> indices) {
-        cloud_plane -> points.push_back(original_cloud->points[index]);
-    }
-    pcl::ExtractIndices<PointT> EI;
-    // Extract the inliers so that we can get other point cloud
-    EI.setInputCloud(original_cloud);
-    EI.setIndices(inliers);
-    EI.setNegative(true);
-    EI.filter(*cloud_other);
+    // Extract plane and non-plane cloud
+    cloud_plane = indicesExtract(original_cloud, inliers);
+    cloud_other = indicesExtract(original_cloud, inliers, true);
     std::cout << "[RANSAC Plane Segmentation] Plane points: " << cloud_plane->points.size() << ", other points: " 
               << cloud_other->points.size() << std::endl;
     return std::make_tuple(cloud_plane, cloud_other);

@@ -59,6 +59,7 @@
 
 #define RED   Color(1, 0, 0)
 #define GREEN Color(0, 1, 0)
+#define BLUE  Color(0, 0, 1)
 #define BLACK Color(0, 0, 0)
 #define WHITE Color(1, 1, 1)
 
@@ -121,7 +122,7 @@ public:
     // Destructor
     ~Segmentation() = default;
     
-    typename pcl::PointCloud<PointT>::Ptr IndicesExtract( const typename pcl::PointCloud<PointT>::Ptr &cloud, pcl::PointIndices::Ptr &indices, const bool &set_negative = false);
+    typename pcl::PointCloud<PointT>::Ptr indicesExtract( const typename pcl::PointCloud<PointT>::Ptr &cloud, pcl::PointIndices::Ptr &indices, const bool &set_negative = false);
     typename pcl::PointCloud<PointT>::Ptr RoughGroundExtraction( const typename pcl::PointCloud<PointT>::Ptr &cloud, const float & height_threshold, const int & min_number);
     std::tuple<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT>::Ptr> PlaneSegmentation( const typename pcl::PointCloud<PointT>::Ptr &original_cloud, const typename pcl::PointCloud<PointT>::Ptr &rough_ground_cloud, const int &maxIterations, const float &distanceThreshold);
     std::tuple<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT>::Ptr> ProgressiveMorphologicalSegmentation( const typename pcl::PointCloud<PointT>::Ptr &cloud, const int &MaxWindowSize, const float &Slope, const float &InitialDistance, const float &MaxDistance);
