@@ -36,6 +36,7 @@
 #include <pcl/filters/radius_outlier_removal.h>      // Radius Outlier Removal
 #include <pcl/filters/uniform_sampling.h>            // Uniform Sampling
 #include <pcl/filters/extract_indices.h>             // Extract pointCloud according to indices
+#include <pcl/filters/crop_box.h>
 
 // Features
 #include <pcl/features/normal_3d_omp.h>
@@ -57,11 +58,13 @@
 // Visualization
 #include <pcl/visualization/pcl_visualizer.h>
 
-#define RED   Color(1, 0, 0)
-#define GREEN Color(0, 1, 0)
-#define BLUE  Color(0, 0, 1)
-#define BLACK Color(0, 0, 0)
-#define WHITE Color(1, 1, 1)
+#define RED Color(0.6, 0, 0)
+//#define RED    Color(0.863, 0.078, 0.235)
+#define GREEN  Color(0.235, 0.702, 0.443)
+#define BLUE   Color(0.117, 0.565, 1)
+#define VIOLET Color(0.933, 0.510, 0.933)
+#define BLACK  Color(0, 0, 0)
+#define WHITE  Color(1, 1, 1)
 
 struct Box{
 	float x_min;
@@ -94,11 +97,12 @@ public:
 
     // Destructor
     ~Filters() = default;
-    typename pcl::PointCloud<PointT>::Ptr PassThroughFilter( const typename pcl::PointCloud<PointT>::Ptr &cloud, const std::__cxx11::string &axis, const std::array<float, 2> &limits);
+    typename pcl::PointCloud<PointT>::Ptr PassThroughFilter( const typename pcl::PointCloud<PointT>::Ptr &cloud, const std::string &axis, const std::array<float, 2> &limits);
     typename pcl::PointCloud<PointT>::Ptr VoxelGridDownSampling( const typename pcl::PCLPointCloud2::Ptr &cloud2, const float &filterRes);
     typename pcl::PointCloud<PointT>::Ptr StatisticalOutlierRemoval( const typename pcl::PointCloud<PointT>::Ptr &cloud, const int &meanK, const double &StddevMulThresh );
     typename pcl::PointCloud<PointT>::Ptr RadiusOutlierRemoval( const typename pcl::PointCloud<PointT>::Ptr &cloud, const double &Radius, const int &MinNeighborsInRadius );
     typename pcl::PointCloud<PointT>::Ptr UniformSampling( const typename pcl::PointCloud<PointT>::Ptr &cloud, const float &SearchRadius);
+    typename pcl::PointCloud<PointT>::Ptr boxFilter( const typename pcl::PointCloud<PointT>::Ptr &cloud, const Eigen::Vector4f &min_point, const Eigen::Vector4f &max_point, const bool &setNegative = false);
 };
 /*---------------------------------------------------------------------------*/
 template<typename PointT>

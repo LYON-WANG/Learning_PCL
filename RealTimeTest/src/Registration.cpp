@@ -1,4 +1,4 @@
-// Real-time object-detection, plane segmentation and registration test using PCL
+// Real-timeregistration test using PCL
 /**
  * Developer: Leo Wang
  * E-mail:    liangyu@student.chalmers.se
@@ -11,7 +11,6 @@
 #include "Function_Registration.cpp"
 #include "Function_User.cpp"
 
-const float SENSOR_HEIGHT = 2;
 const bool DISPLAY = true;
 
 int main(int argc, char** argv){
@@ -21,6 +20,11 @@ int main(int argc, char** argv){
     Registration<pcl::PointXYZ> registration;
     User<pcl::PointXYZ> user;
     pcl::visualization::PCLVisualizer viewer("PCD Viewer");
+    
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_previous(new pcl::PointCloud<pcl::PointXYZ>); // Point cloud last frame
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_now(new pcl::PointCloud<pcl::PointXYZ>);      // Point cloud this frame (now)
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_register(new pcl::PointCloud<pcl::PointXYZ>); // Registrated point cloud
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_final(new pcl::PointCloud<pcl::PointXYZ>);    // Final result 
 
     /*------ Load files ------*/
     const std::string folderPath = "../../Test_data/data_1/"; // File path
@@ -34,7 +38,6 @@ int main(int argc, char** argv){
     while(NUM != fileNum){
         if(DISPLAY == true){ // Clear viewer
             viewer.removeAllPointClouds();
-            viewer.removeAllShapes();
         }
         std::cout << "Frame [" << NUM << "]:" << std::endl;
         auto start_frame = std::chrono::system_clock::now();// Start frame timer
@@ -57,51 +60,16 @@ int main(int argc, char** argv){
         cloud_source_down = filter.boxFilter(cloud_source_down, roof_min, roof_max, true); // Remove roof outliers
         user.timerCalculator(timer_cropbox, "Crop Box Filter"); // Print time
 
-        /*------ 2. Statistical Outlier Removal ------*/
-        // auto timer_outlier = std::chrono::system_clock::now(); // Start timer
-        // cloud_source_down = filter.StatisticalOutlierRemoval(cloud_source_down, 30, 2.0);
-        // user.timerCalculator(timer_outlier, "Outlier Removal");   // Took around 80-90 ms
+        /*------ REGISTRATION ------*/
+        // First frame
+        if(NUM == 0)
+            *cloud_previous = *cloud_source_down;
 
-        /*------ 3. Plane Segmentation ------*/
-        // Rough ground segmentation
-        auto timer_plane = std::chrono::system_clock::now(); // Start plane seg timer
-        std::sort(cloud_source_down->points.begin(),cloud_source_down->points.end(),point_cmp); // Resort points in Z axis
-        cloud_source_down = filter.PassThroughFilter(cloud_source_down, "z", std::array<float, 2> {-SENSOR_HEIGHT-0.2, 1.0f}); // 'Z' Pass filter
-        auto RoughGroundPoints = segmentation.RoughGroundExtraction(cloud_source_down, 1.0, 60);
-        user.timerCalculator(timer_plane, "Rough Ground Extraction");
-        // RANSAC Segmentation
-        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_road(new pcl::PointCloud<pcl::PointXYZ>());
-        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_other(new pcl::PointCloud<pcl::PointXYZ>());
-        pcl::PointIndices::Ptr inliers (new pcl::PointIndices); // Plane inliers
-        auto timer_RAS = std::chrono::system_clock::now(); // Start RANSAC timer
-        std::tie(cloud_road, cloud_other) = segmentation.PlaneSegmentationRANSAC(cloud_source_down, RoughGroundPoints, 150, 0.3);
-        user.timerCalculator(timer_RAS, "RANSAC Segmentation");
-        user.timerCalculator(timer_plane, "Total plane Segmentation");
-
-        /*------ Statistical Outlier Removal ------*/
-        auto timer_outlier = std::chrono::system_clock::now(); // Start timer
-        cloud_other = filter.StatisticalOutlierRemoval(cloud_other, 30, 2.0);
-        user.timerCalculator(timer_outlier, "Outlier Removal");  // Around 30 ms
-
-        /*------ 4. Object Detection ------*/
-        auto timer_clustering = std::chrono::system_clock::now(); // Start RANSAC timer
-        auto cloud_clusters = segmentation.EuclideanClustering(cloud_other, 0.5, 20, 300);
-        int cluster_ID = 1;
-        for(const auto &cluster : cloud_clusters){
-            Box box = segmentation.findBoundingBox(cluster);
-            if(DISPLAY == true)
-                user.drawBoundingBox(viewer, box, cluster_ID, BLUE, 0.8);
-            cluster_ID++;
-        }
-        user.timerCalculator(timer_clustering, "Euclidean Clustering");
-
-        /*------ 5. Registration ------*/
 
         /*------ Visualization ------*/
         if(DISPLAY == true){
             //user.showPointcloud(viewer, RoughGroundPoints, 2, BLUE, "original PCD");
-            user.showPointcloud(viewer, cloud_road, 2, GREEN, "PCD road");
-            user.showPointcloud(viewer, cloud_other, 2, RED, "PCD other");
+            user.showPointcloud(viewer, cloud_previous, 2, GREEN, "PCD TEST");
         }
         user.timerCalculator(start_frame, "Per frame"); // Print frame timer
         std::cout << " " << std::endl; 

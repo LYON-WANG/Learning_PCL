@@ -18,8 +18,8 @@ int main(int argc, char** argv){
     pcl::PCLPointCloud2::Ptr cloud_source(new pcl::PCLPointCloud2());
     pcl::PCLPointCloud2::Ptr cloud_target(new pcl::PCLPointCloud2());
     pcl::PCDReader fileReader;
-    fileReader.read("../../Test_data/data_2/0000000000.pcd", *cloud_source);
-    fileReader.read("../../Test_data/data_2/0000000001.pcd", *cloud_target);
+    fileReader.read("../../Test_data/data_1/0000000000.pcd", *cloud_source);
+    fileReader.read("../../Test_data/data_1/0000000001.pcd", *cloud_target);
     if(cloud_source == NULL || cloud_target == NULL){ 
         std::cout << "Source pcd file read err" << std::endl; return -1;}
 

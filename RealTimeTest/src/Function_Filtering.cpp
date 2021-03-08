@@ -12,7 +12,7 @@
 template<typename PointT>
 typename pcl::PointCloud<PointT>::Ptr 
  Filters<PointT>::PassThroughFilter(const typename pcl::PointCloud<PointT>::Ptr &cloud, 
-                                    const std::__cxx11::string &axis, 
+                                    const std::string &axis, 
                                     const std::array<float, 2> &limits){
     typename pcl::PointCloud<PointT>::Ptr cloud_filtered(new pcl::PointCloud<PointT>());
     pcl::PassThrough<PointT> passFilter;
@@ -87,3 +87,31 @@ typename pcl::PointCloud<PointT>::Ptr
               << cloud->points.size() <<  ", Filtered points: " << cloud_filtered->points.size() << std::endl;
     return cloud_filtered;
  } // Uniform sampling: Keep one point in the radius sphere (center of gravity point)
+
+template<typename PointT>
+ typename pcl::PointCloud<PointT>::Ptr 
+  Filters<PointT>::boxFilter (const typename pcl::PointCloud<PointT>::Ptr &cloud, 
+                              const Eigen::Vector4f &min_point, 
+                              const Eigen::Vector4f &max_point, 
+                              const bool &setNegative){
+    // std::cout << "[RadiusOutlierRemoval] " << " Original points: " 
+    //           << cloud->points.size() << std::end;
+    pcl::CropBox<PointT> region(true);
+    std::vector<int> indices;
+    region.setMin(min_point);
+    region.setMax(max_point);
+    region.setInputCloud(cloud);
+    // region.filter(*cloud);
+    region.filter(indices);
+    pcl::PointIndices::Ptr inliers(new pcl::PointIndices());
+    for (int index : indices)
+        inliers->indices.push_back(index);
+    pcl::ExtractIndices<PointT> extract;
+    // Extract the point cloud on roof
+    extract.setInputCloud(cloud);
+    extract.setIndices(inliers);
+    extract.setNegative(setNegative);
+    extract.filter(*cloud);
+    // std::cout << cloud->points.size() <<  ", Filtered points: " << cloud->points.size() << std::endl;
+    return cloud;
+  }

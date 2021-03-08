@@ -27,4 +27,9 @@ add_executable(${PROJECT_NAME}
 	${CMAKE_CURRENT_SOURCE_DIR} src/${PROJECT_NAME}.cpp)
 target_link_libraries( ${PROJECT_NAME}  ${PCL_LIBRARIES} )
 
+# Name of executable file and path of source file
+add_executable(Registration
+	${CMAKE_CURRENT_SOURCE_DIR} src/Registration.cpp)
+target_link_libraries( Registration  ${PCL_LIBRARIES} )
+
 
