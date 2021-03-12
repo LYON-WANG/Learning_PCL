@@ -67,7 +67,7 @@ void
                            const CameraAngle &camera_angle){
     viewer.setBackgroundColor(background_color.R, background_color.G, background_color.B); // Set black background
     viewer.initCameraParameters();
-    const int distance = 30;
+    const int distance = 90;
     if(camera_angle != FPS)
         viewer.addCoordinateSystem(1.0);
     switch(camera_angle) {
