@@ -61,7 +61,7 @@
 #define RED Color(0.6, 0, 0)
 //#define RED    Color(0.863, 0.078, 0.235)
 #define GREEN  Color(0.235, 0.702, 0.443)
-#define BLUE   Color(0.117, 0.565, 1)
+#define BLUE   Color(0.4, 0.698, 1)
 #define VIOLET Color(0.933, 0.510, 0.933)
 #define BLACK  Color(0, 0, 0)
 #define WHITE  Color(1, 1, 1)

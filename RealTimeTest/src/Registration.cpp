@@ -26,6 +26,7 @@ int main(int argc, char** argv){
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_now(new pcl::PointCloud<pcl::PointXYZ>);      // Point cloud this frame (now)
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_NDT(new pcl::PointCloud<pcl::PointXYZ>); // NDT Registrated point cloud
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_ICP(new pcl::PointCloud<pcl::PointXYZ>); // ICP Registrated point cloud
+    //pcl::PointCloud<pcl::PointNormal>::Ptr cloud_ICP(new pcl::PointCloud<pcl::PointNormal>);
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_output(new pcl::PointCloud<pcl::PointXYZ>); // ICP Registrated point cloud
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_final(new pcl::PointCloud<pcl::PointXYZ>);    // Final result 
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_result(new pcl::PointCloud<pcl::PointXYZ>);    // Final result 
@@ -53,7 +54,7 @@ int main(int argc, char** argv){
 
         /*------ 2. Down Sampling ------*/
         auto timer_downsampling = std::chrono::system_clock::now(); // Start down sampling timer
-        auto cloud_down = filter.VoxelGridDownSampling(cloud, 0.3f); // PCLPointCloud2 --> pcl::PointXYZ
+        auto cloud_down = filter.VoxelGridDownSampling(cloud, 0.5f); // PCLPointCloud2 --> pcl::PointXYZ
         user.timerCalculator(timer_downsampling, "Down Sampling"); // Print time
 
         // Distance Box
@@ -92,26 +93,26 @@ int main(int argc, char** argv){
         }
         else if(NUM%5 == 0 && NUM != 0){
             viewer.removeAllPointClouds();
-            std::cout << "------------------------------- Registration [Frame " << NUM - 2 << ", " << NUM<< "] -----------------------------------------" << std::endl; 
+            std::cout << "------------------------------- Registration [Frame " << NUM - 5 << ", " << NUM<< "] -----------------------------------------" << std::endl; 
             *cloud_now = *cloud_other;
             
             // NDT registration
             auto timer_NDT = std::chrono::system_clock::now(); // Start NDT timer
-            std::tie(cloud_NDT, NDT_transMatrix) = registration.NDT_Registration(cloud_previous, cloud_now, initial_guess_transMatrix, 1e-2, 0.2, 2.0, 10);
+            std::tie(cloud_NDT, NDT_transMatrix) = registration.NDT_Registration(cloud_previous, cloud_now, initial_guess_transMatrix, 1e-2, 0.2, 3.0, 10);
             user.timerCalculator(timer_NDT, "NDT registration"); // Print time
 
             // Estimate normals
-            std::cout << "\n...Estimate normals..." << std::endl;
-            auto timer_normal = std::chrono::system_clock::now(); // Start timer
-            auto cloud_NDT_normal = feature.Normal_Estimation(cloud_NDT, 30);
-            auto cloud_now_normal = feature.Normal_Estimation(cloud_now, 30);
-            user.timerCalculator(timer_normal, "Normal Estimation");
+            // std::cout << "\n...Estimate normals..." << std::endl;
+            // auto timer_normal = std::chrono::system_clock::now(); // Start timer
+            // auto cloud_NDT_normal = feature.Normal_Estimation(cloud_NDT, 30);
+            // auto cloud_now_normal = feature.Normal_Estimation(cloud_now, 30);
+            // user.timerCalculator(timer_normal, "Normal Estimation");
             
             // ICP registration
             auto timer_ICP = std::chrono::system_clock::now(); // Start ICP timer
-            std::tie(cloud_ICP, ICP_transMatrix) = registration.ICP_Point2Point(cloud_NDT, cloud_now, NDT_transMatrix, 100, 1e-6, 0.2);
+            std::tie(cloud_ICP, ICP_transMatrix) = registration.ICP_Point2Point(cloud_NDT, cloud_now, NDT_transMatrix, 100, 1e-7, 0.6);
             //std::tie(cloud_ICP, ICP_transMatrix) = registration.ICP_Point2Plane(cloud_NDT_normal, cloud_now_normal, NDT_transMatrix, 100, 1e-6, 0.2);
-            pcl::transformPointCloud (*cloud_now, *cloud_output, ICP_transMatrix.inverse()*NDT_transMatrix.inverse());
+            pcl::transformPointCloud (*cloud_now, *cloud_output, ICP_transMatrix.inverse() * NDT_transMatrix.inverse());
             user.timerCalculator(timer_ICP, "ICP registration"); // Print time
 
             // Transfer aligned cloud into global coordinate
@@ -126,12 +127,12 @@ int main(int argc, char** argv){
         }
         /*------ Visualization ------*/
         if(DISPLAY == true){
-            user.showPointcloud(viewer, cloud_now, 2, RED, "PCD");
-            user.showPointcloud(viewer, cloud_ICP, 2, GREEN, "PCD TEST");
+            //user.showPointcloud(viewer, cloud_now, 2, RED, "PCD");
+            user.showPointcloud(viewer, cloud_final, 2, BLUE, "PCD TEST");
         }
         user.timerCalculator(start_frame, "Per frame"); // Print frame timer
         NUM ++;
-        std::this_thread::sleep_for(std::chrono::milliseconds(500)); // Delay for replaying
+        //std::this_thread::sleep_for(std::chrono::milliseconds(500)); // Delay for replaying
         viewer.spinOnce();
     }
     pcl::io::savePCDFile("./../result.pcd", *cloud_final);

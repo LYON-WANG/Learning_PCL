@@ -31,8 +31,8 @@ template<typename PointT>  //ICP point-to-point
     typename pcl::PointCloud<PointT>::Ptr output(new pcl::PointCloud<PointT>);
     typename pcl::IterativeClosestPoint<PointT, PointT> icp;
     icp.setMaximumIterations(MaxIteration);
-    //icp.setEuclideanFitnessEpsilon(Epsilon);  // Convergence condition: The smaller the accuracy, the slower the convergence
-	//icp.setMaxCorrespondenceDistance(MaxCorrespondenceDistance);
+    icp.setEuclideanFitnessEpsilon(Epsilon);  // Convergence condition: The smaller the accuracy, the slower the convergence
+	icp.setMaxCorrespondenceDistance(MaxCorrespondenceDistance);
     icp.setInputSource(cloud_source);      
     icp.setInputTarget(cloud_target); 
     icp.align(*output, init_transform);  
@@ -54,6 +54,7 @@ template<typename PointT>  //ICP point-to-plane
                                         const int &MaxIteration,
                                         const float &Epsilon,
                                         const float &MaxCorrespondenceDistance){
+    //typename pcl::PointCloud<pcl::PointNormal>::Ptr output(new pcl::PointCloud<pcl::PointNormal>);
     typename pcl::IterativeClosestPointNonLinear<pcl::PointNormal, pcl::PointNormal> icp;
     icp.setMaximumIterations(MaxIteration);
     icp.setEuclideanFitnessEpsilon(Epsilon);  // Convergence condition: The smaller the accuracy, the slower the convergence
