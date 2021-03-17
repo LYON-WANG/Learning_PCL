@@ -8,6 +8,39 @@
  * E-mail:    liangyu@student.chalmers.se
  * Date:      02/2020
  */
+class Oxts_Data{
+    public:
+        Oxts_Data(){};
+        float lat;   // ** GPS ** latitude of the oxts  - unit [deg]    
+        float lon;   // ** GPS ** longitude of the oxts - unit [deg]
+        float alt;   // ** GPS ** altitude of the oxts  - unit [m]
+
+        float roll;  // roll angle(rad), 0 = level, positive = left side up, range : -pi   .. + pi
+        float pitch; // pitch angle(rad), 0 = level, positive = front down, range : -pi / 2 .. + pi / 2
+        float yaw;   // heading(rad), 0 = east, positive = counter clockwise, range : -pi   .. + pi
+
+        float vn; // velocity towards north [m/s]
+        float ve; // velocity towards east [m/s]
+        float vf; // forward velocity, i.e.parallel to earth - surface [m/s]
+        float vl; // leftward velocity, i.e.parallel to earth - surface [m/s]
+        float vu; // upward velocity, i.e.perpendicular to earth - surface [m/s]
+
+        float ax; // acceleration in x, i.e.in direction of vehicle front [m/s^2]
+        float ay; // acceleration in y, i.e.in direction of vehicle left [m/s^2]
+        float az; // acceleration in z, i.e.in direction of vehicle top [m/s^2]
+        float af; // forward acceleration [m/s^2]
+        float al; // leftward acceleration [m/s^2]
+        float au; // upward acceleration [m/s^2]
+
+        float wx; // angular rate around x [rad/s]
+        float wy; // angular rate around y [rad/s]
+        float wz; // angular rate around z [rad/s]
+        float wf; // angular rate around forward axis [rad/s]
+        float wl; // angular rate around leftward axis [rad/s]
+        float wu; // angular rate around upward axis [rad/s]
+
+};
+
 template<typename PointT>
 std::tuple<std::vector<std::string>, int16_t> 
  User<PointT>::loadFile (const std::string &folderPath){
@@ -39,7 +72,8 @@ template<typename PointT>
 typename pcl::PointCloud<PointT>::Ptr
  User<PointT>::loadKitti (const std::vector<std::string> &filePaths, 
                           const int16_t &NUM){
-    typename pcl::PointCloud<PointT>::Ptr points (new pcl::PointCloud<PointT>);
+    pcl::PointCloud<pcl::PointXYZI>::Ptr points (new pcl::PointCloud<pcl::PointXYZI>);
+    typename pcl::PointCloud<PointT>::Ptr cloud (new pcl::PointCloud<PointT>);
     fstream input(filePaths[NUM].c_str(), ios::in | ios::binary);
     if(!input.good()){
 		cerr << "Could not read file: " << filePaths[NUM] << endl;
@@ -48,13 +82,15 @@ typename pcl::PointCloud<PointT>::Ptr
 	input.seekg(0, ios::beg);
     int i;
 	for (i=0; input.good() && !input.eof(); i++) {
-		PointT point;
+		pcl::PointXYZI point;
 		input.read((char *) &point.x, 3*sizeof(float));
 		input.read((char *) &point.intensity, sizeof(float));
 		points->push_back(point);
 	}
 	input.close();
-    return input;
+    pcl::copyPointCloud(*points, *cloud);
+    std::cout << "Load file: [" << filePaths[NUM] << "]." << std::endl;
+    return cloud;
 }
 
 template<typename PointT>
@@ -139,3 +175,4 @@ void
         viewer.setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_OPACITY, opacity*0.5, cube_fill);
     }
 }
+

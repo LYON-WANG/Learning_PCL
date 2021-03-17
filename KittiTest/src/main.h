@@ -12,6 +12,7 @@
 #define MAIN_H_
 
 #include <iostream>
+#include <fstream>
 #include <memory>
 #include <thread>
 #include <random>
@@ -91,6 +92,7 @@ struct Color{
 		: R(setR), G(setG), B(setB)
 	{}
 };
+
 /*---------------------------------------------------------------------------*/
 template<typename PointT>
 class Filters{
@@ -171,5 +173,14 @@ public:
     void initCamera(pcl::visualization::PCLVisualizer &viewer, const Color &background_color, const CameraAngle &camera_angle);
     void drawBoundingBox (pcl::visualization::PCLVisualizer &viewer, Box box, int box_id, Color color, float opacity);
 };
+/*---------------------------------------------------------------------------*/
+class UKF{
+public:
+    // Constructor
+    UKF() = default;
 
+    // Destructor
+    ~UKF() = default;
+
+};
 #endif /* MAIN_H_ */

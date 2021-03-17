@@ -11,12 +11,47 @@
 #include "Function_Registration.cpp"
 #include "Function_User.cpp"
 
+const bool DISPLAY = true;
+
 int main(int argc, char** argv){
     Filters<pcl::PointXYZ> filter;
     Features<pcl::PointXYZ> feature;
     Segmentation<pcl::PointXYZ> segmentation;
     Registration<pcl::PointXYZ> registration;
     User<pcl::PointXYZ> user;
+    pcl::visualization::PCLVisualizer viewer("PCD Viewer");
+
+    /*------ Load files ------*/
+    const std::string folder_path = "../../Test_data/2011_09_26/";
+    const std::string pcd_path = folder_path + "velodyne_points/data/"; // Point cloud data path
+    const std::string oxts_path = folder_path + "oxts/data/"; // IMU&GPS data path
+    int16_t fileNum;
+    std::vector<std::string> pcd_paths;
+    std::vector<std::string> oxts_paths;
+    std::tie(pcd_paths, fileNum) = user.loadFile(pcd_path); // Load file path
+    std::tie(oxts_paths, fileNum) = user.loadFile(oxts_path); // Load file path
     
+    // Loop through all files
+    int16_t NUM = 0;
+    CameraAngle camera_angle = TOP; // Set camera angle
+    user.initCamera(viewer, BLACK, camera_angle); // Initialize viewer
+    while(NUM != fileNum){
+        if(DISPLAY == true){ // Clear viewer
+            viewer.removeAllPointClouds();
+        }
+        // Load KITTI -> PCD
+        std::cout << "\nFrame [" << NUM << "]:" << std::endl;
+        auto cloud = user.loadKitti(pcd_paths, NUM);
+
+        /*------ Visualization ------*/
+        if(DISPLAY == true){
+            user.showPointcloud(viewer, cloud, 2, WHITE, "PCD");
+        }
+
+        NUM ++;
+        std::this_thread::sleep_for(std::chrono::milliseconds(100)); // Delay for replaying
+        viewer.spinOnce();
+    }
+
     return 0;
 }
