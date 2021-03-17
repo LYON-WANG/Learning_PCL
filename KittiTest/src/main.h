@@ -1,14 +1,15 @@
 /* \author Leo Wang */
 // Real-time object-detection, plane segmentation and registration test
-// using PCL
+// based on KITTI dataset and using PCL
 
 /**
- * Developer: Leo Wang
+ * Developer: Leo Wang & Varun Hegde
  * E-mail:    liangyu@student.chalmers.se
+	      varunh@student.chalmers.se
  * Date:      03/2020
  */
-#ifndef REALTIMETEST_H_
-#define REALTIMETEST_H_
+#ifndef MAIN_H_
+#define MAIN_H_
 
 #include <iostream>
 #include <memory>
@@ -171,4 +172,4 @@ public:
     void drawBoundingBox (pcl::visualization::PCLVisualizer &viewer, Box box, int box_id, Color color, float opacity);
 };
 
-#endif /* REALTIMETEST_H_ */
+#endif /* MAIN_H_ */
