@@ -12,7 +12,7 @@
 #define MAIN_H_
 
 #include <iostream>
-#include <fstream>
+//#include <fstream>
 #include <memory>
 #include <thread>
 #include <random>
@@ -29,9 +29,9 @@
 #include <pcl/ModelCoefficients.h>
 #include <pcl/io/pcd_io.h>
 #include <pcl/common/common.h>
-#include <pcl/common/io.h>
+//#include <pcl/common/io.h>
 #include <pcl/point_types.h>
-#include <pcl/common/point_operators.h>
+//#include <pcl/common/point_operators.h>
 
 // Filters
 #include <pcl/filters/passthrough.h>                 // PassThrough Filter
@@ -93,6 +93,38 @@ struct Color{
 	{}
 };
 
+class Oxts_Data{
+    public:
+        Oxts_Data(){};
+        double lat;   // ** GPS ** latitude of the oxts  - unit [deg]    
+        double lon;   // ** GPS ** longitude of the oxts - unit [deg]
+        double alt;   // ** GPS ** altitude of the oxts  - unit [m]
+
+        double roll;  // roll angle(rad), 0 = level, positive = left side up, range : -pi   .. + pi
+        double pitch; // pitch angle(rad), 0 = level, positive = front down, range : -pi / 2 .. + pi / 2
+        double yaw;   // heading(rad), 0 = east, positive = counter clockwise, range : -pi   .. + pi
+
+        double vn; // velocity towards north [m/s]
+        double ve; // velocity towards east [m/s]
+        double vf; // forward velocity, i.e.parallel to earth - surface [m/s]
+        double vl; // leftward velocity, i.e.parallel to earth - surface [m/s]
+        double vu; // upward velocity, i.e.perpendicular to earth - surface [m/s]
+
+        double ax; // acceleration in x, i.e.in direction of vehicle front [m/s^2]
+        double ay; // acceleration in y, i.e.in direction of vehicle left [m/s^2]
+        double az; // acceleration in z, i.e.in direction of vehicle top [m/s^2]
+        double af; // forward acceleration [m/s^2]
+        double al; // leftward acceleration [m/s^2]
+        double au; // upward acceleration [m/s^2]
+
+        double wx; // angular rate around x [rad/s]
+        double wy; // angular rate around y [rad/s]
+        double wz; // angular rate around z [rad/s]
+        double wf; // angular rate around forward axis [rad/s]
+        double wl; // angular rate around leftward axis [rad/s]
+        double wu; // angular rate around upward axis [rad/s]
+
+};
 /*---------------------------------------------------------------------------*/
 template<typename PointT>
 class Filters{
@@ -167,6 +199,7 @@ public:
     
     std::tuple<std::vector<std::string>, int16_t> loadFile(const std::string &folderPath);
     typename pcl::PointCloud<PointT>::Ptr loadKitti(const std::vector<std::string> &filePaths, const int16_t &NUM);
+    Oxts_Data loadOxts(const std::vector<std::string> &filePaths, const int16_t &NUM);
     void timerCalculator(const std::chrono::_V2::system_clock::time_point &start_time, const std::string &function);
     pcl::PCLPointCloud2::Ptr loadPCD(const std::vector<std::string> &filePaths, const int16_t &NUM);
     void showPointcloud(pcl::visualization::PCLVisualizer &viewer, typename pcl::PointCloud<PointT>::Ptr &cloud, const int &point_size, const Color &color, const std::string &name);

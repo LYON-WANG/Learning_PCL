@@ -16,7 +16,7 @@ find_package(Eigen3 REQUIRED)
 include_directories(${EIGEN3_INCLUDE_DIRS})
 
 # FInd and include PCL
-find_package(PCL REQUIRED COMPONENT common io filters visualization segmentation)
+find_package(PCL REQUIRED)
 # link_directories must be before add_executable
 include_directories(${PCL_INCLUDE_DIRS})
 link_directories(${PCL_LIBRARY_DIRS})
@@ -26,5 +26,7 @@ add_definitions( ${PCL_DEFINITIONS} )
 add_executable(${PROJECT_NAME}
 	${CMAKE_CURRENT_SOURCE_DIR} src/${PROJECT_NAME}.cpp)
 target_link_libraries( ${PROJECT_NAME}  ${PCL_LIBRARIES} )
+
+
 
 

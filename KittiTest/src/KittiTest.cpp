@@ -22,9 +22,8 @@ int main(int argc, char** argv){
     pcl::visualization::PCLVisualizer viewer("PCD Viewer");
 
     /*------ Load files ------*/
-    const std::string folder_path = "../../Test_data/2011_09_26/";
-    const std::string pcd_path = folder_path + "velodyne_points/data/"; // Point cloud data path
-    const std::string oxts_path = folder_path + "oxts/data/"; // IMU&GPS data path
+    const std::string pcd_path = "../../Test_data/2011_09_26/velodyne_points/data/"; // Point cloud data path
+    const std::string oxts_path = "../../Test_data/2011_09_26/oxts/data/"; // IMU&GPS data path
     int16_t fileNum;
     std::vector<std::string> pcd_paths;
     std::vector<std::string> oxts_paths;
@@ -42,6 +41,9 @@ int main(int argc, char** argv){
         // Load KITTI -> PCD
         std::cout << "\nFrame [" << NUM << "]:" << std::endl;
         auto cloud = user.loadKitti(pcd_paths, NUM);
+        // Load IMU & GPS
+        auto oxts_data = user.loadOxts(oxts_paths, NUM);
+        
 
         /*------ Visualization ------*/
         if(DISPLAY == true){

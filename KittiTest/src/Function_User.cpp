@@ -8,38 +8,6 @@
  * E-mail:    liangyu@student.chalmers.se
  * Date:      02/2020
  */
-class Oxts_Data{
-    public:
-        Oxts_Data(){};
-        float lat;   // ** GPS ** latitude of the oxts  - unit [deg]    
-        float lon;   // ** GPS ** longitude of the oxts - unit [deg]
-        float alt;   // ** GPS ** altitude of the oxts  - unit [m]
-
-        float roll;  // roll angle(rad), 0 = level, positive = left side up, range : -pi   .. + pi
-        float pitch; // pitch angle(rad), 0 = level, positive = front down, range : -pi / 2 .. + pi / 2
-        float yaw;   // heading(rad), 0 = east, positive = counter clockwise, range : -pi   .. + pi
-
-        float vn; // velocity towards north [m/s]
-        float ve; // velocity towards east [m/s]
-        float vf; // forward velocity, i.e.parallel to earth - surface [m/s]
-        float vl; // leftward velocity, i.e.parallel to earth - surface [m/s]
-        float vu; // upward velocity, i.e.perpendicular to earth - surface [m/s]
-
-        float ax; // acceleration in x, i.e.in direction of vehicle front [m/s^2]
-        float ay; // acceleration in y, i.e.in direction of vehicle left [m/s^2]
-        float az; // acceleration in z, i.e.in direction of vehicle top [m/s^2]
-        float af; // forward acceleration [m/s^2]
-        float al; // leftward acceleration [m/s^2]
-        float au; // upward acceleration [m/s^2]
-
-        float wx; // angular rate around x [rad/s]
-        float wy; // angular rate around y [rad/s]
-        float wz; // angular rate around z [rad/s]
-        float wf; // angular rate around forward axis [rad/s]
-        float wl; // angular rate around leftward axis [rad/s]
-        float wu; // angular rate around upward axis [rad/s]
-
-};
 
 template<typename PointT>
 std::tuple<std::vector<std::string>, int16_t> 
@@ -176,3 +144,27 @@ void
     }
 }
 
+template<typename PointT>
+Oxts_Data
+ User<PointT>::loadOxts(const std::vector<std::string> &filePaths, 
+                   const int16_t &NUM){
+    Oxts_Data oxts_data;
+    fstream fin;
+    fin.open(filePaths[NUM], ios::in);
+
+    if(fin.is_open()){
+        fin >> oxts_data.lat >> oxts_data.lon >> oxts_data.alt;
+        fin >> oxts_data.roll >> oxts_data.pitch >> oxts_data.yaw;
+	    fin >> oxts_data.vn >> oxts_data.ve;
+
+        fin >> oxts_data.vf >> oxts_data.vl >> oxts_data.vu;
+	    fin >> oxts_data.ax >> oxts_data.ay >> oxts_data.az;
+	    fin >> oxts_data.af >> oxts_data.al >> oxts_data.au;
+	    fin >> oxts_data.wx >> oxts_data.wy >> oxts_data.wz;
+	    fin >> oxts_data.wf >> oxts_data.wl >> oxts_data.wu;
+        std::cout << "Load file: [" << filePaths[NUM] << "]." << std::endl;
+        return oxts_data;
+    }
+    else
+        std::cout << "Unable to load file.." << std::endl;
+}
