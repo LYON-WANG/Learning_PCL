@@ -22,6 +22,9 @@
 #include<algorithm>
 
 // Eigen
+#include <Eigen/Core>
+#include <Eigen/LU>
+#include <Eigen/Eigen>
 #include <Eigen/Dense>
 
 // PCL Library
@@ -100,9 +103,9 @@ class Oxts_Data{
         double lon;   // ** GPS ** longitude of the oxts - unit [deg]
         double alt;   // ** GPS ** altitude of the oxts  - unit [m]
 
-        double roll;  // roll angle(rad), 0 = level, positive = left side up, range : -pi   .. + pi
-        double pitch; // pitch angle(rad), 0 = level, positive = front down, range : -pi / 2 .. + pi / 2
-        double yaw;   // heading(rad), 0 = east, positive = counter clockwise, range : -pi   .. + pi
+        double roll;  // roll angle(rad), 0 = level, positive = left side up, range :  [-pi .. + pi]
+        double pitch; // pitch angle(rad), 0 = level, positive = front down, range :   [-pi/2 .. + pi/2]
+        double yaw;   // heading(rad), 0 = east, positive = counter clockwise, range : [-pi .. + pi]
 
         double vn; // velocity towards north [m/s]
         double ve; // velocity towards east [m/s]
@@ -123,8 +126,8 @@ class Oxts_Data{
         double wf; // angular rate around forward axis [rad/s]
         double wl; // angular rate around leftward axis [rad/s]
         double wu; // angular rate around upward axis [rad/s]
-
 };
+
 /*---------------------------------------------------------------------------*/
 template<typename PointT>
 class Filters{
@@ -207,13 +210,4 @@ public:
     void drawBoundingBox (pcl::visualization::PCLVisualizer &viewer, Box box, int box_id, Color color, float opacity);
 };
 /*---------------------------------------------------------------------------*/
-class UKF{
-public:
-    // Constructor
-    UKF() = default;
-
-    // Destructor
-    ~UKF() = default;
-
-};
 #endif /* MAIN_H_ */

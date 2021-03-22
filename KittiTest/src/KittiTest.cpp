@@ -10,6 +10,7 @@
 #include "Function_Segmentation.cpp"
 #include "Function_Registration.cpp"
 #include "Function_User.cpp"
+#include "Function_UKF.cpp"
 
 const bool DISPLAY = true;
 
@@ -19,6 +20,8 @@ int main(int argc, char** argv){
     Segmentation<pcl::PointXYZ> segmentation;
     Registration<pcl::PointXYZ> registration;
     User<pcl::PointXYZ> user;
+    UKF ukf;
+    Odometer odom;
     pcl::visualization::PCLVisualizer viewer("PCD Viewer");
 
     /*------ Load files ------*/
@@ -30,30 +33,75 @@ int main(int argc, char** argv){
     std::tie(pcd_paths, fileNum) = user.loadFile(pcd_path); // Load file path
     std::tie(oxts_paths, fileNum) = user.loadFile(oxts_path); // Load file path
     
+    // /*------ Save data to .CSV file ------*/
+    // std::ofstream AccRecordingFile;
+    // std::ofstream GyroRecordingFile;
+    // std::ofstream GpsRecordingFile;
+    // //std::ofstream UkfRecoringFile;
+    // AccRecordingFile.trunc;   // Clear the CSV file
+    // GyroRecordingFile.trunc; 
+    // GpsRecordingFile.trunc;  
+    // AccRecordingFile.open("../SaveCSV/Acc.csv", std::ios::out);
+    // GyroRecordingFile.open("../saveCSV/Gyro.csv", std::ios::out);
+    // GpsRecordingFile.open("../saveCSV/GPS.csv", std::ios::out);
+    // //UkfRecoringFile.open("/opt/saveCSV/EKF.csv", std::ios::out);
+
+
     // Loop through all files
     int16_t NUM = 0;
+    Oxts_Data oxts_now;
+    Oxts_Data oxts_pre;
     CameraAngle camera_angle = TOP; // Set camera angle
     user.initCamera(viewer, BLACK, camera_angle); // Initialize viewer
     while(NUM != fileNum){
+        auto frame_timer = std::chrono::system_clock::now();
         if(DISPLAY == true){ // Clear viewer
             viewer.removeAllPointClouds();
         }
         // Load KITTI -> PCD
         std::cout << "\nFrame [" << NUM << "]:" << std::endl;
         auto cloud = user.loadKitti(pcd_paths, NUM);
-        // Load IMU & GPS
-        auto oxts_data = user.loadOxts(oxts_paths, NUM);
+        // Load IMU & GPS data
+        oxts_now = user.loadOxts(oxts_paths, NUM);
+        //std::cout << "Measurement: LAT: " << oxts_now.lat << std::endl;
         
+        // Initialize UKF
+        if(NUM < 1){
+            odom.Initialize();
+            ukf.Initialize(odom, oxts_now);
+            oxts_pre = oxts_now; // Initialize oxts_pre (sensor data)
+        }
+        else{
+            ukf.GPSConvertor(odom, oxts_now, oxts_pre);
+            ukf.GetMeasurement(odom, oxts_now);
+            std::cout << "pitch rate: " << oxts_now.wy << std::endl;
+            std::cout << "Measurement: \n" << ukf.measurements_ << std::endl;
+            
+
+            oxts_pre = oxts_now; // Update oxts_pre (sensor data)
+        }
 
         /*------ Visualization ------*/
         if(DISPLAY == true){
             user.showPointcloud(viewer, cloud, 2, WHITE, "PCD");
         }
 
+        // /*------ Save data to .CSV file ------*/
+        // GpsRecordingFile << std::to_string(oxts_now.lat) << ',' << std::to_string(oxts_now.lon) << ',' << std::to_string(oxts_now.alt) << ',' 
+        //     << std::to_string(oxts_now.vf) << ',' << std::to_string(oxts_now.yaw)  << std::endl;
+        // //----- ACC -----//
+        // AccRecordingFile << std::to_string(oxts_now.ax) << ',' << std::to_string(oxts_now.ay) << ',' << std::to_string(oxts_now.az) << std::endl;
+        // //----- Gyro -----//
+        // GyroRecordingFile << std::to_string(oxts_now.wx) << ',' << std::to_string(oxts_now.wy) << ',' << std::to_string(oxts_now.wz) << std::endl;
+
         NUM ++;
+        user.timerCalculator(frame_timer, "Every Frame");
         std::this_thread::sleep_for(std::chrono::milliseconds(100)); // Delay for replaying
         viewer.spinOnce();
     }
+    // GpsRecordingFile.close();
+    // GyroRecordingFile.close();
+    // AccRecordingFile.close();
 
     return 0;
 }
