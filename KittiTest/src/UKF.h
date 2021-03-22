@@ -16,56 +16,66 @@ class Odometer
 {
     public:
         Odometer(){};
-        float mx_;  
-        float my_;  
-        float mz_;  
-        float ds_;
+        double mx_;  
+        double my_;  
+        double mz_;  
+        double ds_;
 
         void Initialize();
+        void GPSConvertor(const Oxts_Data &measurement_now, const Oxts_Data &measurement_pre);
+
+    private:
+        const double PI_= 3.14159;
+        const int earthRadius_ = 6378388;
+
 };
 
 class UKF
 {
-public:
+private:
     // sensor sampling rate 10 Hz 
-    float dt_ = 0.1;
+    const double dt_ = 0.1;
     // State dimension (Augumented)
-    int num_x_;
+    const int num_x_ = 15;
+public:
     // Augmented state dimension
-    int num_aug_x_;
+    //const int num_aug_x_;
     // Sigma point spreading parameter
-    double lambda_;
+    double lambda_ = 3 - num_x_;
     // Process Noise Covariance Matrix Q
-    Eigen::Matrix<float, 10, 10> Q_;
+    Eigen::Matrix<double, 10, 10> Q_;
     // Measurement Noise Covariance Matrix R
-    Eigen::Matrix<float, 7, 7> R_;
+    Eigen::Matrix<double, 7, 7> R_;
     // Initial Uncertainty Covariance P0
-    Eigen::Matrix<float, 15, 15> P0_; // 15 States: [x,y,z, V, theta(pitch),psi(roll),phi(yaw), dot_theta,dot_psi,dot_phi, 
+    Eigen::Matrix<double, 15, 15> P0_; // 15 States: [x,y,z, V, theta(pitch),psi(roll),phi(yaw), dot_theta,dot_psi,dot_phi, 
                                       //             gamma_a, gamma_theta, gamma_psi, gamma_phi, gamma_z]
+    const double gamma_a_ = 0.0;
+    const double gamma_pitch_ = 0.0;
+    const double gamma_roll_ = 0.0;
+    const double gamma_yaw_ = 0.0;
+    const double gamma_z_ = 0.0;
 
-    float gamma_a_ = 0;
-    float gamma_pitch_ = 0;
-    float gamma_roll_ = 0;
-    float gamma_yaw_ = 0;
-    float gamma_z_ = 0;
+    Eigen::Matrix<double, 15, 1> x_f_;  // Filtered Estimates
+    Eigen::Matrix<double, 15, 15> p_f_; // Filtered Error Covariance
+    Eigen::Matrix<double, 10, 1> x_p_;  // Predicted Estimates
+    Eigen::Matrix<double, 15, 15> p_p_; // Predicted Error Covariance
 
-    Eigen::Matrix<float, 15, 1> x_pre_;
-    Eigen::Matrix<float, 15, 15> p_pre_;
+    // Sigma points and weights
+    Eigen::Matrix<double, 15, 31> SP_; // Sigma points
+    Eigen::Matrix<double, 1, 31> W_;   // Sigma point Weights
+    Eigen::Matrix<double, 10, 31> SP_predict_; // Sigma points
 
-    Eigen::Matrix<float, 7, 1> measurements_;
+    // Measurement matrix
+    Eigen::Matrix<double, 7, 1> measurements_;
 
-    void SetProcessNoiseCovatiance(const float dt, const float sGPS = 8.8f, const float sCourse = 0.1f, const float sTurnRate = 1.0f);
-    void SetMeasureNoiseCovatiance(const float var_GPS = 6.0f, const float var_speed = 1.0f, const float var_turn_angle = 0.01f);
+    void SetProcessNoiseCovatiance(const double &dt, const double &sGPS = 8.8, const double &sCourse = 0.1, const double &sTurnRate = 1.0);
+    void SetMeasureNoiseCovatiance(const double &var_GPS = 6.0, const double &var_speed = 1.0, const double &var_turn_angle = 0.01);
     void SetInitialCovariance();
     void Initialize(const Odometer &odo, const Oxts_Data &oxts_data); // Initializa UKF (X_0, P_0)
-    void GPSConvertor(Odometer &odo, const Oxts_Data &measurement_now, const Oxts_Data &measurement_pre);
-    void GetMeasurement(const Odometer &odo, const Oxts_Data oxts_data);
-    Eigen::MatrixXd GenerateSigmaPoints(Eigen::VectorXd x, Eigen::MatrixXd P, double const lambda, const int num_sig);
-
-private:
-    const double PI_= 3.14159;
-    const int earthRadius_ = 6378388;
-
+    void GetMeasurement(const Odometer &odo, const Oxts_Data &oxts_data);
+    void GenerateSigmaPoints(const Eigen::MatrixXd &x, const Eigen::MatrixXd &P);
+    void PredictSigmaPoints(const Eigen::MatrixXd &SP, const Eigen::MatrixXd &W, const double &dt);
+    void Prediction(const Eigen::VectorXd &x, const Eigen::MatrixXd &P);
 };
 
 

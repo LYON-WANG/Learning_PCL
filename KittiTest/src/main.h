@@ -19,7 +19,8 @@
 #include <cstdlib>
 #include <chrono>
 #include <dirent.h>
-#include<algorithm>
+#include <algorithm>
+#include <string>
 
 // Eigen
 #include <Eigen/Core>
