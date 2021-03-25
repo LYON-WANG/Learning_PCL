@@ -128,7 +128,7 @@ int main(int argc, char** argv){
         /*------ Visualization ------*/
         if(DISPLAY == true){
             //user.showPointcloud(viewer, cloud_now, 2, RED, "PCD");
-            user.showPointcloud(viewer, cloud_final, 2, BLUE, "PCD TEST");
+            user.showPointcloud(viewer, cloud_final, 2, WHITE, "PCD TEST");
         }
         user.timerCalculator(start_frame, "Per frame"); // Print frame timer
         NUM ++;

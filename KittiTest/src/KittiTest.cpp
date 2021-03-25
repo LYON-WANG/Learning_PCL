@@ -33,20 +33,6 @@ int main(int argc, char** argv){
     std::tie(pcd_paths, fileNum) = user.loadFile(pcd_path); // Load file path
     std::tie(oxts_paths, fileNum) = user.loadFile(oxts_path); // Load file path
     
-    // // /*------ Save data to .CSV file ------*/
-    // std::ofstream AccRecordingFile;
-    // std::ofstream GyroRecordingFile;
-    // std::ofstream GpsRecordingFile;
-    // //std::ofstream UkfRecoringFile;
-    // AccRecordingFile.trunc;   // Clear the CSV file
-    // GyroRecordingFile.trunc; 
-    // GpsRecordingFile.trunc;  
-    // GpsRecordingFile.open("../SaveCSV/GPS.csv", std::ios::out);
-    // AccRecordingFile.open("../SaveCSV/Acc.csv", std::ios::out);
-    // GyroRecordingFile.open("../SaveCSV/Gyro.csv", std::ios::out);
-    // //UkfRecoringFile.open("/opt/saveCSV/EKF.csv", std::ios::out);
-
-
     // Loop through all files
     int16_t NUM = 0;
     Oxts_Data oxts_now;
@@ -63,16 +49,7 @@ int main(int argc, char** argv){
         auto cloud = user.loadKitti(pcd_paths, NUM);
         // Load IMU & GPS data
         oxts_now = user.loadOxts(oxts_paths, NUM);
-        
-        // // /*------ Save data to .CSV file ------*/
-        // GpsRecordingFile << std::to_string(oxts_now.lat) << ',' << std::to_string(oxts_now.lon) << ',' << std::to_string(oxts_now.alt) << ',' 
-        //     << std::to_string(oxts_now.vf) << ',' << std::to_string(oxts_now.yaw)  << std::endl;
-        // //----- ACC -----//
-        // AccRecordingFile << std::to_string(oxts_now.ax) << ',' << std::to_string(oxts_now.ay) << ',' << std::to_string(oxts_now.az) << std::endl;
-        // //----- Gyro -----//
-        // GyroRecordingFile << std::to_string(oxts_now.wx) << ',' << std::to_string(oxts_now.wy) << ',' << std::to_string(oxts_now.wz) << std::endl;
-
-
+       
         // Initialize UKF
         if(NUM < 1){
             odom.Initialize();
@@ -84,18 +61,16 @@ int main(int argc, char** argv){
         else{
             /*------ UKF Prediction ------*/
             ukf.Prediction(ukf.x_f_, ukf.p_f_);
-            //std::cout << ukf.W_ << std::endl;
 
             /*------ UKF Update ------*/
-            //odom.GPSConvertor(oxts_now, oxts_pre);
-            //ukf.GetMeasurement(odom, oxts_now);
+            odom.GPSConvertor(oxts_now, oxts_pre);
+            ukf.GetMeasurement(odom, oxts_now);
             //std::cout << "Measurement: \n" << ukf.measurements_ << std::endl;
+            ukf.Update(ukf.x_p_, ukf.p_p_, ukf.measurements_, odom);
             
 
-            //oxts_pre = oxts_now; // Update oxts_pre (sensor data)
+            oxts_pre = oxts_now; // Update oxts_pre (sensor data)
         }
-
-
 
         /*------ Visualization ------*/
         if(DISPLAY == true){
@@ -105,12 +80,9 @@ int main(int argc, char** argv){
 
         NUM ++;
         user.timerCalculator(frame_timer, "Every Frame");
-        //std::this_thread::sleep_for(std::chrono::milliseconds(100)); // Delay for replaying
+        std::this_thread::sleep_for(std::chrono::milliseconds(100)); // Delay for replaying
         viewer.spinOnce();
     }
-    // GpsRecordingFile.close();
-    // AccRecordingFile.close();
-    // GyroRecordingFile.close();
 
     return 0;
 }

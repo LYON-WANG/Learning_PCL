@@ -45,7 +45,7 @@ public:
     // Process Noise Covariance Matrix Q
     Eigen::Matrix<double, 10, 10> Q_;
     // Measurement Noise Covariance Matrix R
-    Eigen::Matrix<double, 7, 7> R_;
+    Eigen::Matrix<double, 8, 8> R_;
     // Initial Uncertainty Covariance P0
     Eigen::Matrix<double, 15, 15> P0_; // 15 States: [x,y,z, V, theta(pitch),psi(roll),phi(yaw), dot_theta,dot_psi,dot_phi, 
                                       //             gamma_a, gamma_theta, gamma_psi, gamma_phi, gamma_z]
@@ -58,24 +58,28 @@ public:
     Eigen::Matrix<double, 15, 1> x_f_;  // Filtered Estimates
     Eigen::Matrix<double, 15, 15> p_f_; // Filtered Error Covariance
     Eigen::Matrix<double, 10, 1> x_p_;  // Predicted Estimates
-    Eigen::Matrix<double, 15, 15> p_p_; // Predicted Error Covariance
+    Eigen::Matrix<double, 10, 10> p_p_; // Predicted Error Covariance
 
     // Sigma points and weights
     Eigen::Matrix<double, 15, 31> SP_; // Sigma points
     Eigen::Matrix<double, 1, 31> W_;   // Sigma point Weights
     Eigen::Matrix<double, 10, 31> SP_predict_; // Sigma points
+    Eigen::Matrix<double, 10, 21> SP_U_; // Sigma points in update step
+    Eigen::Matrix<double, 1, 21> W_U_;   // Sigma point Weights in update step 
 
     // Measurement matrix
-    Eigen::Matrix<double, 7, 1> measurements_;
+    Eigen::Matrix<double, 8, 1> measurements_;
 
     void SetProcessNoiseCovatiance(const double &dt, const double &sGPS = 8.8, const double &sCourse = 0.1, const double &sTurnRate = 1.0);
-    void SetMeasureNoiseCovatiance(const double &var_GPS = 6.0, const double &var_speed = 1.0, const double &var_turn_angle = 0.01);
+    void SetMeasureNoiseCovatiance(const double &var_GPS = 6.0, const double &var_speed = 1.0, const double &var_course = 0.01, const double &var_turn_angle = 0.01);
     void SetInitialCovariance();
-    void Initialize(const Odometer &odo, const Oxts_Data &oxts_data); // Initializa UKF (X_0, P_0)
-    void GetMeasurement(const Odometer &odo, const Oxts_Data &oxts_data);
+    void Initialize(const Odometer &odom, const Oxts_Data &oxts_data); // Initializa UKF (X_0, P_0)
+    void GetMeasurement(const Odometer &odom, const Oxts_Data &oxts_data);
     void GenerateSigmaPoints(const Eigen::MatrixXd &x, const Eigen::MatrixXd &P);
     void PredictSigmaPoints(const Eigen::MatrixXd &SP, const Eigen::MatrixXd &W, const double &dt);
-    void Prediction(const Eigen::VectorXd &x, const Eigen::MatrixXd &P);
+    void Prediction(const Eigen::MatrixXd &x, const Eigen::MatrixXd &P);
+    
+    void Update(const Eigen::MatrixXd &x, const Eigen::MatrixXd &P, const Eigen::MatrixXd &measure, const Odometer &odom);
 };
 
 
