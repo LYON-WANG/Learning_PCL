@@ -39,7 +39,7 @@ int main(int argc, char** argv){
     Oxts_Data oxts_now;
     Oxts_Data oxts_pre;
     std::vector<double> GPSX, GPSY, filteredX, filteredY; // For matplotlib
-    CameraAngle camera_angle = FPS; // Set camera angle
+    CameraAngle camera_angle = TOP; // Set camera angle
     user.initCamera(viewer, BLACK, camera_angle); // Initialize viewer
     while(NUM != fileNum){
         auto frame_timer = std::chrono::system_clock::now();
@@ -61,20 +61,19 @@ int main(int argc, char** argv){
         /*---------------          UKF          ---------------*/
         // Initialize UKF
         if(NUM < 1){
-            odom.Initialize();
-            ukf.Initialize(odom, oxts_now);
-            oxts_pre = oxts_now; // Initialize oxts_pre (sensor data)
-            ukf.GetMeasurement(odom, oxts_now);
+            odom.Initialize(); // Initialize Odometer
+            ukf.Initialize(odom, oxts_now); // Initialize UKF Q, R, P0, x_f, p_f
+            oxts_pre = oxts_now; // Initialize oxts_pre (sensor data) for future odometer calculation
+            ukf.GetMeasurement(odom, oxts_now); // Get first measurement (Actually not used, only for plotting.)
         }
         else{
             /*------ UKF Prediction ------*/
             ukf.Prediction(ukf.x_f_, ukf.p_f_);
             /*------ UKF Update ------*/ 
-            odom.GPSConvertor(oxts_now, oxts_pre);
-            ukf.GetMeasurement(odom, oxts_now);
-            ukf.Update(ukf.x_p_, ukf.p_p_, ukf.measurements_, odom);
+            odom.GPSConvertor(oxts_now, oxts_pre); // Convert GPS coordinates to mileage [meter]
+            ukf.GetMeasurement(odom, oxts_now); // Get measurement for update step
+            ukf.Update(ukf.x_p_, ukf.p_p_, ukf.measurements_, odom); 
             oxts_pre = oxts_now; // Update oxts_pre (sensor data)
-            //std::cout << ukf.x_f_ << std::endl;
         }
 
         /*------ Visualization ------*/
@@ -85,17 +84,7 @@ int main(int argc, char** argv){
             filteredY.push_back(ukf.x_f_(1,0));
             GPSX.push_back(ukf.measurements_(0,0));
             GPSY.push_back(ukf.measurements_(1,0));
-            std::cout << "X: " << ukf.x_f_(0,0) << ", Y: " << ukf.x_f_(1,0) << std::endl;
-            if(NUM % 1 == 0){
-                matplotlibcpp::clf(); // Clear [matplotlib] previous plot
-                matplotlibcpp::scatter(GPSX, GPSY, 8);
-                matplotlibcpp::named_plot("Filtered", filteredX, filteredY, "r-"); // Filtered positions
-                matplotlibcpp::title("UKF");
-                matplotlibcpp::legend(); // Enable legend
-                matplotlibcpp::grid(true); // Enable Grid
-                matplotlibcpp::pause(0.001);  // Display plot continuously
-                std::cout << "Plotting.................................." << std::endl;
-            }
+            ukf.Plot(GPSX, GPSY, filteredX, filteredY);
         }
 
         NUM ++;

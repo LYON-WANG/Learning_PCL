@@ -217,6 +217,18 @@ void
    }
 }
 
+void 
+ UKF::Plot(const std::vector<double> &GPSX, const std::vector<double> &GPSY, 
+          const std::vector<double> &filteredX, const std::vector<double> &filteredY){
+   matplotlibcpp::clf(); // Clear [matplotlib] previous plot
+   matplotlibcpp::scatter(GPSX, GPSY, 8);
+   matplotlibcpp::named_plot("Filtered", filteredX, filteredY, "r-"); // Filtered positions
+   matplotlibcpp::title("UKF Result");
+   matplotlibcpp::legend(); // Enable legend
+   matplotlibcpp::grid(true); // Enable Grid
+   matplotlibcpp::pause(0.001);  // Display plot continuously
+}
+
 // Initialize odometers to 0. 
 void 
  Odometer::Initialize(){
