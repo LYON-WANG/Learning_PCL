@@ -114,9 +114,11 @@ void
                                const Color &color, 
                                const std::string &name){
     //pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> cloud_color_h(cloud, color.R, color.G, color.B);
-    viewer.addPointCloud(cloud, name);
+    pcl::visualization::PointCloudColorHandlerGenericField<pcl::PointXYZ> fildColor(cloud, "z");
+    
+    viewer.addPointCloud(cloud, fildColor, name);
     viewer.setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, point_size, name);
-    viewer.setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_COLOR, color.R, color.G, color.B, name);
+    //viewer.setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_COLOR, color.R, color.G, color.B, name);
 }
 
 template<typename PointT>

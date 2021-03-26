@@ -25,7 +25,6 @@ class Odometer
         void GPSConvertor(const Oxts_Data &measurement_now, const Oxts_Data &measurement_pre);
 
     private:
-        const double PI_= 3.14159;
         const int earthRadius_ = 6378388;
 
 };
@@ -41,7 +40,7 @@ public:
     // Augmented state dimension
     //const int num_aug_x_;
     // Sigma point spreading parameter
-    double lambda_ = 3 - num_x_;
+    const double lambda_ = 3 - num_x_;
     // Process Noise Covariance Matrix Q
     Eigen::Matrix<double, 10, 10> Q_;
     // Measurement Noise Covariance Matrix R
@@ -63,7 +62,7 @@ public:
     // Sigma points and weights
     Eigen::Matrix<double, 15, 31> SP_; // Sigma points
     Eigen::Matrix<double, 1, 31> W_;   // Sigma point Weights
-    Eigen::Matrix<double, 10, 31> SP_predict_; // Sigma points
+    Eigen::Matrix<double, 10, 31> SP_predict_; // f(Sigma points) [f: Motion model function(CTRV / CV)]
     Eigen::Matrix<double, 10, 21> SP_U_; // Sigma points in update step
     Eigen::Matrix<double, 1, 21> W_U_;   // Sigma point Weights in update step 
 

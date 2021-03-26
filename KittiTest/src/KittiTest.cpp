@@ -37,9 +37,9 @@ int main(int argc, char** argv){
     int16_t NUM = 0;
     Oxts_Data oxts_now;
     Oxts_Data oxts_pre;
-    CameraAngle camera_angle = TOP; // Set camera angle
+    CameraAngle camera_angle = FPS; // Set camera angle
     user.initCamera(viewer, BLACK, camera_angle); // Initialize viewer
-    while(NUM != 3){
+    while(NUM != fileNum){
         auto frame_timer = std::chrono::system_clock::now();
         if(DISPLAY == true){ // Clear viewer
             viewer.removeAllPointClouds();
@@ -56,20 +56,16 @@ int main(int argc, char** argv){
             ukf.Initialize(odom, oxts_now);
             oxts_pre = oxts_now; // Initialize oxts_pre (sensor data)
             ukf.GetMeasurement(odom, oxts_now);
-            //std::cout << "Measurement: \n" << ukf.measurements_ << std::endl;
         }
         else{
             /*------ UKF Prediction ------*/
             ukf.Prediction(ukf.x_f_, ukf.p_f_);
-
-            /*------ UKF Update ------*/
+            /*------ UKF Update ------*/ 
             odom.GPSConvertor(oxts_now, oxts_pre);
             ukf.GetMeasurement(odom, oxts_now);
-            //std::cout << "Measurement: \n" << ukf.measurements_ << std::endl;
             ukf.Update(ukf.x_p_, ukf.p_p_, ukf.measurements_, odom);
-            
-
             oxts_pre = oxts_now; // Update oxts_pre (sensor data)
+            std::cout << ukf.x_f_ << std::endl;
         }
 
         /*------ Visualization ------*/
@@ -77,10 +73,9 @@ int main(int argc, char** argv){
             user.showPointcloud(viewer, cloud, 2, WHITE, "PCD");
         }
 
-
         NUM ++;
         user.timerCalculator(frame_timer, "Every Frame");
-        std::this_thread::sleep_for(std::chrono::milliseconds(100)); // Delay for replaying
+        //std::this_thread::sleep_for(std::chrono::milliseconds(100)); // Delay for replaying
         viewer.spinOnce();
     }
 
