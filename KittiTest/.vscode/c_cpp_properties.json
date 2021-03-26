@@ -6,7 +6,8 @@
                 "${workspaceFolder}/**",
                 "/usr/include/eigen3",
                 "/usr/include/pcl-1.8",
-                "/usr/include/vtk-6.3"
+                "/usr/include/vtk-6.3",
+                "/usr/include/python2.7"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/clang",

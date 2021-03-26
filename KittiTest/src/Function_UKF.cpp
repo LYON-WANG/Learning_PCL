@@ -11,10 +11,11 @@
 
 // Set process noise covariance matrix Q [10, 10]
 void 
- UKF::SetProcessNoiseCovatiance(const double &dt, const double &sGPS, const double &sCourse, 
+ UKF::SetProcessNoiseCovatiance(const double &sGPS, const double &sCourse, 
                                  const double &sTurnRate){
    Eigen::Matrix<double, 10, 10> i(Eigen::MatrixXd::Identity(10, 10));  
    Eigen::DiagonalMatrix<double, 10> m;
+   double dt(dt_);
    m.diagonal() << (0.5 * sGPS * dt * dt) * (0.5 * sGPS * dt * dt), (0.5 * sGPS * dt * dt) *(0.5 * sGPS * dt * dt), 
                    (0.5 * sGPS * dt * dt) * (0.5 * sGPS * dt * dt), (sGPS * dt) * (sGPS * dt), 
                    (sCourse * dt) * (sCourse * dt), (sCourse * dt) * (sCourse * dt), (sCourse * dt) * (sCourse * dt), 
@@ -46,9 +47,9 @@ void
    p_p_ = Eigen::MatrixXd::Zero(10,10);
    measurements_ = Eigen::MatrixXd::Zero(8, 1);
    // UKF Initialize noise covariance
-   SetProcessNoiseCovatiance(UKF::dt_, 8.8, 0.1, 1.0); // Q
-   SetMeasureNoiseCovatiance(6.0, 1.0, 0.01, 0.0017); // R
-   SetInitialCovariance(); // P0
+   SetProcessNoiseCovatiance(8.8, 0.1, 1.0); // Initialize Q
+   SetMeasureNoiseCovatiance(6.0, 1.0, 0.01, 0.0017); // Initialize R
+   SetInitialCovariance(); // Initialize P0
    x_f_ << odom.mx_, odom.my_, odom.mz_, oxts_data.vf, 0.0, 0.0, oxts_data.yaw, oxts_data.wy/180*M_PI, 
                   oxts_data.wx/180*M_PI, oxts_data.wz/180*M_PI, gamma_a_, gamma_pitch_, gamma_roll_, gamma_yaw_, gamma_z_;
    p_f_ = P0_;

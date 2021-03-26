@@ -69,7 +69,7 @@ public:
     // Measurement matrix
     Eigen::Matrix<double, 8, 1> measurements_;
 
-    void SetProcessNoiseCovatiance(const double &dt, const double &sGPS = 8.8, const double &sCourse = 0.1, const double &sTurnRate = 1.0);
+    void SetProcessNoiseCovatiance(const double &sGPS = 8.8, const double &sCourse = 0.1, const double &sTurnRate = 1.0);
     void SetMeasureNoiseCovatiance(const double &var_GPS = 6.0, const double &var_speed = 1.0, const double &var_course = 0.01, const double &var_turn_angle = 0.01);
     void SetInitialCovariance();
     void Initialize(const Odometer &odom, const Oxts_Data &oxts_data); // Initializa UKF (X_0, P_0)

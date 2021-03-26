@@ -66,6 +66,9 @@
 // Visualization
 #include <pcl/visualization/pcl_visualizer.h>
 
+// Matplotlib cpp
+#include "matplotlibcpp.h"
+
 #define RED Color(0.6, 0, 0)
 //#define RED    Color(0.863, 0.078, 0.235)
 #define GREEN  Color(0.235, 0.702, 0.443)
