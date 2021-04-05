@@ -79,6 +79,8 @@ public:
     void Prediction(const Eigen::MatrixXd &x, const Eigen::MatrixXd &P);
     void Update(const Eigen::MatrixXd &x, const Eigen::MatrixXd &P, const Eigen::MatrixXd &measure, const Odometer &odom);
     void Plot(const std::vector<double> &GPSX, const std::vector<double> &GPSY, const std::vector<double> &filteredX, const std::vector<double> &filteredY);
+    void Euler2Quaternion();
+    void Quaternion2Rotation();
 };
 
 
