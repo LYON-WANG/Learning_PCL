@@ -229,6 +229,40 @@ void
    matplotlibcpp::pause(0.001);  // Display plot continuously
 }
 
+Eigen::Matrix<double, 4, 1> 
+ UKF::Euler2Quaternion(const double &rollAngle, const double &pitchAngle, const double &yawAngle){
+   auto q1 = (double) cos(0.5 * rollAngle) * cos(0.5 * pitchAngle) * cos(0.5 * yawAngle) + (double) sin(0.5 * rollAngle) * sin(0.5 * pitchAngle) * sin(0.5 * yawAngle); 
+   auto q2 = (double) sin(0.5 * rollAngle) * cos(0.5 * pitchAngle) * cos(0.5 * yawAngle) - (double) cos(0.5 * rollAngle) * sin(0.5 * pitchAngle) * sin(0.5 * yawAngle); 
+   auto q3 = (double) cos(0.5 * rollAngle) * sin(0.5 * pitchAngle) * cos(0.5 * yawAngle) + (double) sin(0.5 * rollAngle) * cos(0.5 * pitchAngle) * sin(0.5 * yawAngle); 
+   auto q4 = (double) cos(0.5 * rollAngle) * cos(0.5 * pitchAngle) * sin(0.5 * yawAngle) - (double) sin(0.5 * rollAngle) * sin(0.5 * pitchAngle) * cos(0.5 * yawAngle); 
+   Eigen::Matrix<double, 4, 1> quaternion;
+   quaternion << q1, q2, q3, q4;
+   return quaternion;
+}
+
+Eigen::Matrix<double, 3, 3> 
+ UKF::Quaternion2Rotation(const Eigen::MatrixXd &q){
+   auto q0(q(0, 0));
+   auto q1(q(1, 0));
+   auto q2(q(2, 0));
+   auto q3(q(3, 0));
+   Eigen::Matrix<double, 3, 3> R;
+   R << q0*q0 + q1*q1 - q2*q2 - q3*q3,  2*(q1*q2 - q0*q3),  2*(q0*q2 + q1*q3),
+        2*(q1*q2 + q0*q3), q0*q0 - q1*q1 + q2*q2 - q3*q3, 2*(q2*q3 - q0*q1),
+        2*(q1*q3 - q0*q2), 2*(q0*q1 + q2*q3),  q0*q0 - q1*q1 - q2*q2 + q3*q3;
+   return R;
+}
+
+Eigen::Matrix<double, 4, 4> 
+ UKF::GetTransformMatrix(const Eigen::MatrixXd & R, const double &delta_X, const double &delta_Y, const double &delta_Z){
+   Eigen::Matrix<double, 4, 4> T(Eigen::MatrixXd::Zero(4, 4));
+   T << R(0,0), R(0,1), R(0,2), delta_X,
+        R(1,0), R(1,1), R(1,2), delta_X,
+        R(2,0), R(2,1), R(2,2), delta_X,
+        0, 0, 0, 1;
+   return T;
+ }
+
 // Initialize odometers to 0. 
 void 
  Odometer::Initialize(){
