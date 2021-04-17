@@ -23,6 +23,7 @@ class Odometer
 
         void Initialize();
         void GPSConvertor(const Oxts_Data &measurement_now, const Oxts_Data &measurement_pre);
+	void GPSConvertorwgs84(const Oxts_Data &sensor_data_now, const Oxts_Data &sensor_data_pre);
 
     private:
         const int earthRadius_ = 6378388;
@@ -79,6 +80,12 @@ public:
     void Prediction(const Eigen::MatrixXd &x, const Eigen::MatrixXd &P);
     void Update(const Eigen::MatrixXd &x, const Eigen::MatrixXd &P, const Eigen::MatrixXd &measure, const Odometer &odom);
     void Plot(const std::vector<double> &GPSX, const std::vector<double> &GPSY, const std::vector<double> &filteredX, const std::vector<double> &filteredY);
+    Eigen::Matrix<float, 4, 1> Euler2Quaternion(const float &rollAngle, const float &pitchAngle, const float &yawAngle);
+    Eigen::Matrix<float, 3, 3> Quaternion2Rotation(const Eigen::MatrixXf &q);
+    Eigen::Matrix<float, 4, 4> GetTransformMatrix(const Eigen::MatrixXf & R, const float &delta_X, const float &delta_Y, const float &delta_Z);
+
+
+    	
 };
 
 

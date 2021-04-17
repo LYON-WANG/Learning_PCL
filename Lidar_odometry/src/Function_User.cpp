@@ -191,7 +191,7 @@ Oxts_Data User<PointT>::loadOxts(const std::vector<std::string> &filePaths,
 }
 
 template <typename PointT>
-std::vector<double>
+std::vector<float>
 User<PointT>::Transformmatrix_to_states(const Eigen::Matrix4f &R) {
 
   float epsilon = sqrt(R(0, 0) * R(0, 0) + R(1, 0) * R(1, 0));
@@ -200,7 +200,7 @@ User<PointT>::Transformmatrix_to_states(const Eigen::Matrix4f &R) {
   // Occurs if pitch is close to +/- 90 degrees
   if (!singular) {
     // states order x,y,z,pitch,roll,yaw
-    std::vector<double> states(6);
+    std::vector<float> states(6);
     states[0] = R(0, 3);
     states[1] = R(1, 3);
     states[2] = R(2, 3);
@@ -209,7 +209,7 @@ User<PointT>::Transformmatrix_to_states(const Eigen::Matrix4f &R) {
     states[5] = atan2(R(1, 0), R(0, 0));
     return states;
   } else { // states order x,y,z,pitch,roll,yaw
-    std::vector<double> states(6);
+    std::vector<float> states(6);
     states[0] = R(0, 3);
     states[1] = R(1, 3);
     states[2] = R(2, 3);

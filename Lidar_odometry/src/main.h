@@ -69,6 +69,9 @@
 // Matplotlib cpp
 #include "matplotlibcpp.h"
 
+// GPS to cartesian
+#include "WGS84toCartesian.hpp"
+
 #define RED Color(0.6, 0, 0)
 //#define RED    Color(0.863, 0.078, 0.235)
 #define GREEN Color(0.235, 0.702, 0.443)
@@ -277,7 +280,7 @@ public:
                   const CameraAngle &camera_angle);
   void drawBoundingBox(pcl::visualization::PCLVisualizer &viewer, Box box,
                        int box_id, Color color, float opacity);
-  std::vector<double> Transformmatrix_to_states(const Eigen::Matrix4f &R);
+  std::vector<float> Transformmatrix_to_states(const Eigen::Matrix4f &R);
 };
 /*---------------------------------------------------------------------------*/
 #endif /* MAIN_H_ */

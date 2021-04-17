@@ -1,4 +1,5 @@
 #include "UKF.h"
+#include "WGS84toCartesian.hpp"
 /* \author Leo Wang & Varun Hegde*/
 // Customized Supporting function for pointcloud processing 
 // using PCL
@@ -250,3 +251,46 @@ void
    Odometer::mz_ += dz;
    Odometer::ds_ = sqrt(dx*dx + dy*dy); 
 }
+
+void
+ Odometer::GPSConvertorwgs84(const Oxts_Data &sensor_data_now, const Oxts_Data &sensor_data_pre){
+   std::array<double, 2>  wgs84_coord_ref = {sensor_data_pre.lat, sensor_data_pre.lon};
+   std::array<double, 2>  wgs84_coord_now = {sensor_data_now.lat, sensor_data_now.lon};
+   std::array<double, 2> wgs84local_coord = wgs84::toCartesian(wgs84_coord_ref, wgs84_coord_now);
+   Odometer::mx_ += wgs84local_coord[0];
+   Odometer::my_ += wgs84local_coord[1];
+}
+
+Eigen::Matrix<float, 4, 1> 
+ UKF::Euler2Quaternion(const float &rollAngle, const float &pitchAngle, const float &yawAngle){
+   auto q1 = (float) cos(0.5 * rollAngle) * cos(0.5 * pitchAngle) * cos(0.5 * yawAngle) + (float) sin(0.5 * rollAngle) * sin(0.5 * pitchAngle) * sin(0.5 * yawAngle); 
+   auto q2 = (float) sin(0.5 * rollAngle) * cos(0.5 * pitchAngle) * cos(0.5 * yawAngle) - (float) cos(0.5 * rollAngle) * sin(0.5 * pitchAngle) * sin(0.5 * yawAngle); 
+   auto q3 = (float) cos(0.5 * rollAngle) * sin(0.5 * pitchAngle) * cos(0.5 * yawAngle) + (float) sin(0.5 * rollAngle) * cos(0.5 * pitchAngle) * sin(0.5 * yawAngle); 
+   auto q4 = (float) cos(0.5 * rollAngle) * cos(0.5 * pitchAngle) * sin(0.5 * yawAngle) - (float) sin(0.5 * rollAngle) * sin(0.5 * pitchAngle) * cos(0.5 * yawAngle); 
+   Eigen::Matrix<float, 4, 1> quaternion;
+   quaternion << q1, q2, q3, q4;
+   return quaternion;
+}
+
+Eigen::Matrix<float, 3, 3> 
+ UKF::Quaternion2Rotation(const Eigen::MatrixXf &q){
+   auto q0(q(0, 0));
+   auto q1(q(1, 0));
+   auto q2(q(2, 0));
+   auto q3(q(3, 0));
+   Eigen::Matrix<float, 3, 3> R;
+   R << q0*q0 + q1*q1 - q2*q2 - q3*q3,  2*(q1*q2 - q0*q3),  2*(q0*q2 + q1*q3),
+        2*(q1*q2 + q0*q3), q0*q0 - q1*q1 + q2*q2 - q3*q3, 2*(q2*q3 - q0*q1),
+        2*(q1*q3 - q0*q2), 2*(q0*q1 + q2*q3),  q0*q0 - q1*q1 - q2*q2 + q3*q3;
+   return R;
+}
+
+Eigen::Matrix<float, 4, 4> 
+ UKF::GetTransformMatrix(const Eigen::MatrixXf & R, const float &delta_X, const float &delta_Y, const float &delta_Z){
+   Eigen::Matrix<float, 4, 4> T(Eigen::MatrixXf::Zero(4, 4));
+   T << R(0,0), R(0,1), R(0,2), delta_X,
+        R(1,0), R(1,1), R(1,2), delta_Y,
+        R(2,0), R(2,1), R(2,2), delta_Z,
+        0, 0, 0, 1;
+   return T;
+ }

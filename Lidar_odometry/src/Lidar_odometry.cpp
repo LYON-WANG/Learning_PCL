@@ -37,6 +37,9 @@ int main(int argc, char** argv){
     Eigen::Matrix4f NDT_transMatrix = Eigen::Matrix4f::Identity (); // NDT transformation
     Eigen::Matrix4f ICP_transMatrix = Eigen::Matrix4f::Identity ();
     Eigen::Matrix4f global_transMatrix = Eigen::Matrix4f::Identity ();
+    Eigen::Matrix4f Global_GPS_trans_init = Eigen::Matrix4f::Identity ();
+    Eigen::Matrix4f Global_GPS_trans_init_inv = Eigen::Matrix4f::Identity ();
+    Eigen::Matrix4f calib_imugps_to_velo = Eigen::Matrix4f::Identity ();
     Eigen::Matrix4f GPS_IMU_to_Velodyne_kitti = Eigen::Matrix4f::Identity (); // 
 
     /*------ Load files ------*/
@@ -54,6 +57,37 @@ int main(int argc, char** argv){
     Oxts_Data oxts_now;
     Oxts_Data oxts_pre;
     std::vector<double> GPSX, GPSY, LidarodoX, LidarodoY;// For matplotlib
+    Eigen::MatrixXf GPS_trans(4,1);
+    GPS_trans(0,0) = 0;
+    GPS_trans(1,0) = 0;
+    GPS_trans(2,0) = 0;
+    GPS_trans(3,0) = 1;
+
+    Eigen::MatrixXf Lidar_trans(4,1);
+    Lidar_trans(0,0) = 0;
+    Lidar_trans(1,0) = 0;
+    Lidar_trans(2,0) = 0;
+    Lidar_trans(3,0) = 1;
+
+/*
+    calib_time: 25-May-2012 16:47:16
+    R: 9.999976e-01 7.553071e-04 -2.035826e-03 -7.854027e-04 9.998898e-01 -1.482298e-02 2.024406e-03 1.482454e-02 9.998881e-01
+    T: -8.086759e-01 3.195559e-01 -7.997231e-01*/
+
+    calib_imugps_to_velo(0,0)= 9.999976e-01; 
+    calib_imugps_to_velo(0,1)= 7.553071e-04;
+    calib_imugps_to_velo(0,2)= -2.035826e-03;
+    calib_imugps_to_velo(1,0)= -7.854027e-04;
+    calib_imugps_to_velo(1,1)= 9.998898e-01;
+    calib_imugps_to_velo(1,2)= -1.482298e-02;
+    calib_imugps_to_velo(2,0)= 2.024406e-03;
+    calib_imugps_to_velo(2,1)= 1.482454e-02;
+    calib_imugps_to_velo(2,2)= 9.998881e-01;
+    calib_imugps_to_velo(0,3)= -8.086759e-01;
+    calib_imugps_to_velo(1,3)= 3.195559e-01;
+    calib_imugps_to_velo(2,3)= -7.997231e-01;
+     
+    
     CameraAngle camera_angle = TOP; // Set camera angle
     user.initCamera(viewer, BLACK, camera_angle); // Initialize viewer
     while(NUM != fileNum){
@@ -118,12 +152,29 @@ int main(int argc, char** argv){
             std::cout << "enterloop1"<< std::endl;
             *cloud_previous = *cloud_other;
             std::cout << "enterloop2"<< std::endl;
-            *cloud_final += *cloud_previous;
+
+            //*cloud_final += *cloud_previous;
             std::cout << "enterloop3"<< std::endl;
             odom.Initialize(); // Initialize Odometer
             ukf.Initialize(odom, oxts_now); // Initialize UKF Q, R, P0, x_f, p_f
             oxts_pre = oxts_now; // Initialize oxts_pre (sensor data) for future odometer calculation
+            
+            
             ukf.GetMeasurement(odom, oxts_now); // Get first measurement (Actually not used, only for plotting.)
+            //init globlal transmatrix  
+            Eigen::Matrix<float, 4, 1> quat_pre_init = ukf.Euler2Quaternion(oxts_pre.pitch,oxts_pre.roll,oxts_pre.yaw);
+
+            Eigen::Matrix<float, 3, 3> quat_init_rotmat = ukf.Quaternion2Rotation(quat_pre_init);
+            global_transMatrix.block(0,0,3,3)= quat_init_rotmat;
+
+            //init global transmatrix for GPS
+
+            Global_GPS_trans_init =  global_transMatrix;
+            Global_GPS_trans_init_inv = Global_GPS_trans_init.inverse();
+            viewer.removeAllPointClouds();
+
+
+
         }
         //else if(NUM%5 == 0 && NUM != 0){
         else if(NUM != 0){    
@@ -148,9 +199,20 @@ int main(int argc, char** argv){
             pcl::transformPointCloud (*cloud_output, *cloud_result, global_transMatrix);
             global_transMatrix = global_transMatrix * ICP_transMatrix.inverse()*NDT_transMatrix.inverse();
             std::cout << "Global Transform Matrix:\n" << global_transMatrix << std::endl;
-            
+            // transform to ENU GPS system 
+
             // states order x,y,z,pitch,roll,yaw
-            std::vector<double> States_from_trans = user.Transformmatrix_to_states(global_transMatrix);
+            std::vector<float> States_from_trans = user.Transformmatrix_to_states(global_transMatrix);
+            
+            Lidar_trans(0,0) = States_from_trans[0];
+            Lidar_trans(1,0) = States_from_trans[1];
+            Lidar_trans(2,0) = States_from_trans[2];
+            Lidar_trans = Global_GPS_trans_init_inv * Lidar_trans;
+            std::cout << "Global Transform Matrix inverse init:\n" << Global_GPS_trans_init_inv << std::endl;
+            std::cout << "please print status \n" <<  std::endl;
+
+
+
         
 
             //Stitch aligned clouds
@@ -158,18 +220,36 @@ int main(int argc, char** argv){
             *cloud_previous = *cloud_now;
 
             /*------ UKF Update ------*/
-            odom.GPSConvertor(oxts_now, oxts_pre); // Convert GPS coordinates to mileage [meter]
+            //odom.GPSConvertor(oxts_now, oxts_pre); // Convert GPS coordinates to mileage [meter]
+            //wgs84::toCartesian(const std::array<double, 2> &WGS84Reference, const std::array<double, 2> oxts_pre)
+            odom.GPSConvertorwgs84(oxts_now, oxts_pre);
+            GPS_trans(0,0) = ukf.measurements_(0,0);
+            GPS_trans(1,0) = ukf.measurements_(1,0);
+            GPS_trans(2,0) = States_from_trans[2];
+
+
+
+//          GPS_trans = Global_GPS_trans_init * calib_imugps_to_velo* GPS_trans;
+            GPS_trans = Global_GPS_trans_init_inv * GPS_trans;
+
+
+
             ukf.GetMeasurement(odom, oxts_now); // Get measurement for update step
             //ukf.Update(ukf.x_p_, ukf.p_p_, ukf.measurements_, odom); 
             oxts_pre = oxts_now; // Update oxts_pre (sensor data)
 
             if(DISPLAY == true){
+                if(NUM != 1){
             user.showPointcloud(viewer, cloud_final, 2, WHITE, "PCD");
+                }
             // matplot
-            LidarodoX.push_back(States_from_trans[1]);
-            LidarodoY.push_back(-States_from_trans[0]);
-            GPSX.push_back(ukf.measurements_(0,0));
-            GPSY.push_back(ukf.measurements_(1,0));
+            LidarodoX.push_back(Lidar_trans(0,0));
+            LidarodoY.push_back(Lidar_trans(1,0));
+            
+            //GPSX.push_back(ukf.measurements_(0,0));
+            //GPSY.push_back(ukf.measurements_(1,0));
+            GPSX.push_back(GPS_trans(0,0));
+            GPSY.push_back(GPS_trans(1,0));            
             ukf.Plot(GPSX, GPSY, LidarodoX, LidarodoY);
         }
         std::cout << " X axis absolute difference a bsolute in meters" << abs(LidarodoX.back()-GPSX.back());
