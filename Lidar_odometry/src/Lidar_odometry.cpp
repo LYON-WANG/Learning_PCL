@@ -39,7 +39,6 @@ int main(int argc, char** argv){
     Eigen::Matrix4f global_transMatrix = Eigen::Matrix4f::Identity ();
     Eigen::Matrix4f Global_GPS_trans_init = Eigen::Matrix4f::Identity ();
     Eigen::Matrix4f Global_GPS_trans_init_inv = Eigen::Matrix4f::Identity ();
-    Eigen::Matrix4f calib_imugps_to_velo = Eigen::Matrix4f::Identity ();
     Eigen::Matrix4f GPS_IMU_to_Velodyne_kitti = Eigen::Matrix4f::Identity (); // 
 
     /*------ Load files ------*/
@@ -69,23 +68,6 @@ int main(int argc, char** argv){
     Lidar_trans(2,0) = 0;
     Lidar_trans(3,0) = 1;
 
-/*
-    calib_time: 25-May-2012 16:47:16
-    R: 9.999976e-01 7.553071e-04 -2.035826e-03 -7.854027e-04 9.998898e-01 -1.482298e-02 2.024406e-03 1.482454e-02 9.998881e-01
-    T: -8.086759e-01 3.195559e-01 -7.997231e-01*/
-
-    calib_imugps_to_velo(0,0)= 9.999976e-01; 
-    calib_imugps_to_velo(0,1)= 7.553071e-04;
-    calib_imugps_to_velo(0,2)= -2.035826e-03;
-    calib_imugps_to_velo(1,0)= -7.854027e-04;
-    calib_imugps_to_velo(1,1)= 9.998898e-01;
-    calib_imugps_to_velo(1,2)= -1.482298e-02;
-    calib_imugps_to_velo(2,0)= 2.024406e-03;
-    calib_imugps_to_velo(2,1)= 1.482454e-02;
-    calib_imugps_to_velo(2,2)= 9.998881e-01;
-    calib_imugps_to_velo(0,3)= -8.086759e-01;
-    calib_imugps_to_velo(1,3)= 3.195559e-01;
-    calib_imugps_to_velo(2,3)= -7.997231e-01;
      
     
     CameraAngle camera_angle = TOP; // Set camera angle
@@ -204,12 +186,6 @@ int main(int argc, char** argv){
             // states order x,y,z,pitch,roll,yaw
             std::vector<float> States_from_trans = user.Transformmatrix_to_states(global_transMatrix);
             
-            Lidar_trans(0,0) = States_from_trans[0];
-            Lidar_trans(1,0) = States_from_trans[1];
-            Lidar_trans(2,0) = States_from_trans[2];
-            Lidar_trans = Global_GPS_trans_init_inv * Lidar_trans;
-            std::cout << "Global Transform Matrix inverse init:\n" << Global_GPS_trans_init_inv << std::endl;
-            std::cout << "please print status \n" <<  std::endl;
 
 
 
@@ -228,8 +204,7 @@ int main(int argc, char** argv){
             GPS_trans(2,0) = States_from_trans[2];
 
 
-
-//          GPS_trans = Global_GPS_trans_init * calib_imugps_to_velo* GPS_trans;
+            //Transform GPS ENU coordinates to initial vehicle body frame 
             GPS_trans = Global_GPS_trans_init_inv * GPS_trans;
 
 
@@ -257,25 +232,7 @@ int main(int argc, char** argv){
 
 
         }
-        /*---------------          UKF          ---------------*/
-        // Initialize UKF
-/*
-        if(NUM < 1){
-            odom.Initialize(); // Initialize Odometer
-            ukf.Initialize(odom, oxts_now); // Initialize UKF Q, R, P0, x_f, p_f
-            oxts_pre = oxts_now; // Initialize oxts_pre (sensor data) for future odometer calculation
-            ukf.GetMeasurement(odom, oxts_now); // Get first measurement (Actually not used, only for plotting.)
-        } */
-        /*else{
-            /*------ UKF Prediction ------*/
-            //ukf.Prediction(ukf.x_f_, ukf.p_f_);
-            /*------ UKF Update ------*/ 
-            /*
-            odom.GPSConvertor(oxts_now, oxts_pre); // Convert GPS coordinates to mileage [meter]
-            ukf.GetMeasurement(odom, oxts_now); // Get measurement for update step
-            //ukf.Update(ukf.x_p_, ukf.p_p_, ukf.measurements_, odom); 
-            oxts_pre = oxts_now; // Update oxts_pre (sensor data)
-        }
+
         /*------ Visualization ------*/
 
         NUM ++;
