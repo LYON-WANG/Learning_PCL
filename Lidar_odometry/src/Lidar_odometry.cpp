@@ -39,6 +39,7 @@ int main(int argc, char** argv){
     Eigen::Matrix4f global_transMatrix = Eigen::Matrix4f::Identity ();
     Eigen::Matrix4f Global_GPS_trans_init = Eigen::Matrix4f::Identity ();
     Eigen::Matrix4f Global_GPS_trans_init_inv = Eigen::Matrix4f::Identity ();
+
     Eigen::Matrix4f GPS_IMU_to_Velodyne_kitti = Eigen::Matrix4f::Identity (); // 
 
     /*------ Load files ------*/
@@ -147,11 +148,11 @@ int main(int argc, char** argv){
             Eigen::Matrix<float, 4, 1> quat_pre_init = ukf.Euler2Quaternion(oxts_pre.pitch,oxts_pre.roll,oxts_pre.yaw);
 
             Eigen::Matrix<float, 3, 3> quat_init_rotmat = ukf.Quaternion2Rotation(quat_pre_init);
-            global_transMatrix.block(0,0,3,3)= quat_init_rotmat;
+            Global_GPS_trans_init.block(0,0,3,3)= quat_init_rotmat;
 
             //init global transmatrix for GPS
 
-            Global_GPS_trans_init =  global_transMatrix;
+            //Global_GPS_trans_init =  global_transMatrix;
             Global_GPS_trans_init_inv = Global_GPS_trans_init.inverse();
             viewer.removeAllPointClouds();
 
@@ -181,11 +182,13 @@ int main(int argc, char** argv){
             pcl::transformPointCloud (*cloud_output, *cloud_result, global_transMatrix);
             global_transMatrix = global_transMatrix * ICP_transMatrix.inverse()*NDT_transMatrix.inverse();
             std::cout << "Global Transform Matrix:\n" << global_transMatrix << std::endl;
-            // transform to ENU GPS system 
+            
 
             // states order x,y,z,pitch,roll,yaw
             std::vector<float> States_from_trans = user.Transformmatrix_to_states(global_transMatrix);
             
+            Lidar_trans(0,0) = States_from_trans[0];
+            Lidar_trans(1,0) = States_from_trans[1];
 
 
 
@@ -204,7 +207,7 @@ int main(int argc, char** argv){
             GPS_trans(2,0) = States_from_trans[2];
 
 
-            //Transform GPS ENU coordinates to initial vehicle body frame 
+            // Transform GPS ENU to local coordinate system 
             GPS_trans = Global_GPS_trans_init_inv * GPS_trans;
 
 
@@ -232,7 +235,7 @@ int main(int argc, char** argv){
 
 
         }
-
+        
         /*------ Visualization ------*/
 
         NUM ++;
