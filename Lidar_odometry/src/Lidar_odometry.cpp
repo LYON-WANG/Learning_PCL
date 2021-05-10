@@ -37,14 +37,21 @@ int main(int argc, char** argv){
     Eigen::Matrix4f NDT_transMatrix = Eigen::Matrix4f::Identity (); // NDT transformation
     Eigen::Matrix4f ICP_transMatrix = Eigen::Matrix4f::Identity ();
     Eigen::Matrix4f global_transMatrix = Eigen::Matrix4f::Identity ();
+    Eigen::Matrix4f global_transMatrix_lidar = Eigen::Matrix4f::Identity (); // transform the lidar on the gps trajectory
+    
     Eigen::Matrix4f Global_GPS_trans_init = Eigen::Matrix4f::Identity ();
     Eigen::Matrix4f Global_GPS_trans_init_inv = Eigen::Matrix4f::Identity ();
 
-    Eigen::Matrix4f GPS_IMU_to_Velodyne_kitti = Eigen::Matrix4f::Identity (); // 
+    Eigen::Matrix4f GPS_IMU_to_Velodyne_kitti = Eigen::Matrix4f::Identity (); // calibration transform the lidar to IMU/GPS
+    Eigen::Matrix4f GPS_IMU_to_Velodyne_kitti_gt_trans = Eigen::Matrix4f::Identity (); //  calibration transform the lidar to IMU/GPS (rotaion and y direction only)
+    Eigen::Matrix4f GPS_IMU_to_Velodyne_kitti_inv = Eigen::Matrix4f::Identity (); // calibration transform the  IMU/GPS to lidar 
 
     /*------ Load files ------*/
     const std::string pcd_path = "../../Test_data/2011_09_26/2011_09_26_drive_0005_sync/velodyne_points/data/"; // Point cloud data path
     const std::string oxts_path = "../../Test_data/2011_09_26/2011_09_26_drive_0005_sync/oxts/data/"; // IMU&GPS data path
+    //const std::string pcd_path = "../../Test_data/2011_09_26/2011_09_26_drive_0009_sync/velodyne_points/data/"; // Point cloud data path
+    //const std::string oxts_path = "../../Test_data/2011_09_26/2011_09_26_drive_0009_sync/oxts/data/"; // IMU&GPS data path
+    
     int16_t fileNum;
     std::vector<std::string> pcd_paths;
     std::vector<std::string> oxts_paths;
@@ -69,7 +76,41 @@ int main(int argc, char** argv){
     Lidar_trans(2,0) = 0;
     Lidar_trans(3,0) = 1;
 
+/*
+    calib_time: 25-May-2012 16:47:16
+    R: 9.999976e-01 7.553071e-04 -2.035826e-03 -7.854027e-04 9.998898e-01 -1.482298e-02 2.024406e-03 1.482454e-02 9.998881e-01
+    T: -8.086759e-01 3.195559e-01 -7.997231e-01*/
+
+    GPS_IMU_to_Velodyne_kitti(0,0)= 9.999976e-01; 
+    GPS_IMU_to_Velodyne_kitti(0,1)= 7.553071e-04;
+    GPS_IMU_to_Velodyne_kitti(0,2)= -2.035826e-03;
+    GPS_IMU_to_Velodyne_kitti(1,0)= -7.854027e-04;
+    GPS_IMU_to_Velodyne_kitti(1,1)= 9.998898e-01;
+    GPS_IMU_to_Velodyne_kitti(1,2)= -1.482298e-02;
+    GPS_IMU_to_Velodyne_kitti(2,0)= 2.024406e-03;
+    GPS_IMU_to_Velodyne_kitti(2,1)= 1.482454e-02;
+    GPS_IMU_to_Velodyne_kitti(2,2)= 9.998881e-01;
+    GPS_IMU_to_Velodyne_kitti(0,3)= -8.086759e-01;
+    GPS_IMU_to_Velodyne_kitti(1,3)= 3.195559e-01;
+    GPS_IMU_to_Velodyne_kitti(2,3)= -7.997231e-01; 
+
+
+
+    // trans 0 version
+    
+    GPS_IMU_to_Velodyne_kitti_gt_trans(0,0)= 9.999976e-01; 
+    GPS_IMU_to_Velodyne_kitti_gt_trans(0,1)= 7.553071e-04;
+    GPS_IMU_to_Velodyne_kitti_gt_trans(0,2)= -2.035826e-03;
+    GPS_IMU_to_Velodyne_kitti_gt_trans(1,0)= -7.854027e-04;
+    GPS_IMU_to_Velodyne_kitti_gt_trans(1,1)= 9.998898e-01;
+    GPS_IMU_to_Velodyne_kitti_gt_trans(1,2)= -1.482298e-02;
+    GPS_IMU_to_Velodyne_kitti_gt_trans(2,0)= 2.024406e-03;
+    GPS_IMU_to_Velodyne_kitti_gt_trans(2,1)= 1.482454e-02;
+    GPS_IMU_to_Velodyne_kitti_gt_trans(2,2)= 9.998881e-01;
+    GPS_IMU_to_Velodyne_kitti_gt_trans(1,3)= 3.195559e-01;
+    
      
+    GPS_IMU_to_Velodyne_kitti_inv = GPS_IMU_to_Velodyne_kitti.inverse();
     
     CameraAngle camera_angle = TOP; // Set camera angle
     user.initCamera(viewer, BLACK, camera_angle); // Initialize viewer
@@ -125,39 +166,28 @@ int main(int argc, char** argv){
         user.timerCalculator(timer_RAS, "RANSAC Segmentation");
         user.timerCalculator(timer_plane, "Total plane Segmentation");
 
-        int state_dim= 6;
-
-        std::vector<double> States_from_trans (state_dim,0);
+        
 
         /*------ REGISTRATION ------*/
         // First frame
         if(NUM == 0){
             std::cout << "enterloop1"<< std::endl;
             *cloud_previous = *cloud_other;
-            std::cout << "enterloop2"<< std::endl;
 
-            //*cloud_final += *cloud_previous;
-            std::cout << "enterloop3"<< std::endl;
             odom.Initialize(); // Initialize Odometer
             ukf.Initialize(odom, oxts_now); // Initialize UKF Q, R, P0, x_f, p_f
             oxts_pre = oxts_now; // Initialize oxts_pre (sensor data) for future odometer calculation
-            
-            
             ukf.GetMeasurement(odom, oxts_now); // Get first measurement (Actually not used, only for plotting.)
+
             //init globlal transmatrix  
             Eigen::Matrix<float, 4, 1> quat_pre_init = ukf.Euler2Quaternion(oxts_pre.pitch,oxts_pre.roll,oxts_pre.yaw);
-
             Eigen::Matrix<float, 3, 3> quat_init_rotmat = ukf.Quaternion2Rotation(quat_pre_init);
             Global_GPS_trans_init.block(0,0,3,3)= quat_init_rotmat;
 
             //init global transmatrix for GPS
-
-            //Global_GPS_trans_init =  global_transMatrix;
+            global_transMatrix = GPS_IMU_to_Velodyne_kitti_inv* global_transMatrix ;
             Global_GPS_trans_init_inv = Global_GPS_trans_init.inverse();
             viewer.removeAllPointClouds();
-
-
-
         }
         //else if(NUM%5 == 0 && NUM != 0){
         else if(NUM != 0){    
@@ -183,10 +213,11 @@ int main(int argc, char** argv){
             global_transMatrix = global_transMatrix * ICP_transMatrix.inverse()*NDT_transMatrix.inverse();
             std::cout << "Global Transform Matrix:\n" << global_transMatrix << std::endl;
             
+            //refect lidar odometry on GPS for comparision
+            global_transMatrix_lidar = GPS_IMU_to_Velodyne_kitti_gt_trans*global_transMatrix;
 
             // states order x,y,z,pitch,roll,yaw
-            std::vector<float> States_from_trans = user.Transformmatrix_to_states(global_transMatrix);
-            
+            std::vector<float> States_from_trans = user.Transformmatrix_to_states(global_transMatrix_lidar);
             Lidar_trans(0,0) = States_from_trans[0];
             Lidar_trans(1,0) = States_from_trans[1];
 
@@ -209,6 +240,9 @@ int main(int argc, char** argv){
 
             // Transform GPS ENU to local coordinate system 
             GPS_trans = Global_GPS_trans_init_inv * GPS_trans;
+
+
+
 
 
 
