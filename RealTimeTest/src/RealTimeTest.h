@@ -11,6 +11,7 @@
 #define REALTIMETEST_H_
 
 #include <iostream>
+#include <fstream>
 #include <memory>
 #include <thread>
 #include <random>

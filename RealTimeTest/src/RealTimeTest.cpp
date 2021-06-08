@@ -23,7 +23,7 @@ int main(int argc, char** argv){
     pcl::visualization::PCLVisualizer viewer("PCD Viewer");
 
     /*------ Load files ------*/
-    const std::string folderPath = "../../Test_data/data_1/"; // File path
+    const std::string folderPath = "../../Test_data/data_2/"; // File path
     int16_t fileNum;
     std::vector<std::string> filePaths;
     std::tie(filePaths, fileNum) = user.loadFile(folderPath); // Load file path
@@ -106,7 +106,7 @@ int main(int argc, char** argv){
         user.timerCalculator(start_frame, "Per frame"); // Print frame timer
         std::cout << " " << std::endl; 
         NUM ++;
-        std::this_thread::sleep_for(std::chrono::milliseconds(100)); // Delay for replaying
+        std::this_thread::sleep_for(std::chrono::milliseconds(200)); // Delay for replaying
         viewer.spinOnce();
     }
     return 0;

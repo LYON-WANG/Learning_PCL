@@ -80,11 +80,11 @@ int main(int argc, char** argv){
         if(DISPLAY == true){
             user.showPointcloud(viewer, cloud, 2, WHITE, "PCD");
             // matplot
-            filteredX.push_back(ukf.x_f_(0,0));
-            filteredY.push_back(ukf.x_f_(1,0));
-            GPSX.push_back(ukf.measurements_(0,0));
-            GPSY.push_back(ukf.measurements_(1,0));
-            ukf.Plot(GPSX, GPSY, filteredX, filteredY);
+            // filteredX.push_back(ukf.x_f_(0,0));
+            // filteredY.push_back(ukf.x_f_(1,0));
+            // GPSX.push_back(ukf.measurements_(0,0));
+            // GPSY.push_back(ukf.measurements_(1,0));
+            // ukf.Plot(GPSX, GPSY, filteredX, filteredY);
         }
 
         NUM ++;

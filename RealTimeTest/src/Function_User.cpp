@@ -40,7 +40,7 @@ typename pcl::PointCloud<PointT>::Ptr
  User<PointT>::loadKitti (const std::vector<std::string> &filePaths, 
                           const int16_t &NUM){
     typename pcl::PointCloud<PointT>::Ptr points (new pcl::PointCloud<PointT>);
-    fstream cloud(filePaths[NUM].c_str(), ios::in | ios::binary);
+    std::fstream input(filePaths[NUM].c_str(), std::ios::in | std::ios::binary);
     if(!input.good()){
 		cerr << "Could not read file: " << filePaths[NUM] << endl;
 		exit(EXIT_FAILURE);
